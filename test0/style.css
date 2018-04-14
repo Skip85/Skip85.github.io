@@ -1,0 +1,94 @@
+body{
+	margin: 0 auto;
+	font-family: sans-serif;
+}
+ .header{
+ 	display: flex;
+ 	flex-direction: column;
+ 	justify-content: space-between;
+ 	align-items: center;
+ }
+	 .header ul{
+	 	margin: 0;
+	 	padding: 0;
+	 	list-style: none;
+	 	display: flex;
+	 	justify-content: space-between;
+	 	width: 50%;
+
+	 }
+	 .header li{
+	 	cursor: pointer;
+	 	padding: 10px;
+	 }
+	 .content{
+	 	display: flex;
+	 	flex-direction: column;
+	 	padding: 50px;
+	 }
+
+/* Список дел */
+
+	 	.todo-list{
+		 margin: 0 50px;
+	 	}
+	 	.todo-list ul{
+	 		list-style: none;
+	 	}
+	 	.todo-list li{
+			margin: 5px 0;
+	 	}
+	 	.todo i{
+	 		float: left;
+	 		font-weight: bold;
+	 		margin-right: 5px;
+	 		cursor: pointer;
+	 		color: #535353;
+	 	}
+	 	.todo i:hover{
+	 		color: #000;
+	 	}
+	 	.active{
+	 		border-bottom: 1px solid #535353;
+	 	}
+
+/* Фильтрация */
+
+		.input{
+			height: 30px;
+    		width: 200px;
+		}
+		ul.my-new-list{
+			padding: 0;
+			list-style: none;
+		}
+		.my-new-list li{
+			padding: 5px 0;
+		}
+
+/* Обо мне */
+
+	 	.first-name{
+	 		display: flex;
+	 	}
+	 	.first-name i{
+	 		color: #5F5F5F;
+	 		font-size: 32px;
+	 		margin-right: 10px;
+	 		font-style: normal;
+	 	}
+	 	.first-name i:hover{
+	 		color: #000;
+	 		cursor: pointer;
+	 	}
+	 	.first-name h1{
+			margin: 5px 10px;
+	 	}
+	 	.first-name input{
+	 		display: none;
+	 		font-size: 32px;
+	 		font-weight: bold;
+	 	}
+	 	.save-name{
+	 		display: none;
+	 	}

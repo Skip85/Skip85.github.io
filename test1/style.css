@@ -1,0 +1,237 @@
+.header{
+	background:  #BFD6F5;
+}
+.header ul{
+	list-style: none;
+	display: flex;
+	justify-content: space-around;
+	padding: 0;
+
+}
+.header li{
+	padding:20px 0;
+	cursor: pointer;
+	font-size: 20px;
+	font-weight: bold;
+
+}
+.active{
+	border-bottom: 3px solid;
+}
+.summary{
+	padding-top: 50px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+}
+	.summary h1{
+		border-bottom: 2px solid; 
+	}
+	.about{
+		display: flex;
+	    padding-bottom: 100px;
+	    flex-wrap: wrap;
+	    
+	}
+	.left-bt{
+		position: absolute;
+	    width: 70%;
+	    height: 70%;
+	    bottom: 0;
+	    border-bottom: 5px solid;
+	    border-left: 5px solid;
+	}
+	.right-top{
+		position: absolute;
+	    width: 70%;
+	    height: 70%;
+	    right: 0;
+	    top: 0;
+	    border-top: 5px solid #165DAA;
+	    border-right: 5px solid #165DAA;
+	}
+	.photo{
+		max-width: 300px;
+		padding: 0;
+		margin-right: 20px;
+	}
+	 .photo img{
+	 	width: 100%;
+	 }
+	 .basis{
+	 	display: flex;
+	 	flex-direction: column;
+	 }
+	 .basis, .extra{
+	 	background: #165DAA;
+	 	color: #fff;
+	 }
+	 	.skills h2{
+	 		padding-bottom: 50px;
+	 		padding-top: 20px;
+	 	}
+	 .blue{
+	 	color: #165DAA;
+	 }
+	 .skills{
+	 	padding: 0;
+	 	background: #165DAA;
+	 }
+	 .skill-block{
+	 	display: flex;
+	 	justify-content: space-between;
+	 	margin-bottom: 15px;
+
+	 }
+	 .skill-block p{
+	 	margin: 0;
+	 }
+	 .extra-block{
+	 	display: flex;
+	 	justify-content: space-between;
+	 	margin-bottom: 15px;
+	 }
+	 .extra-block p{
+	 	margin: 0;
+	 }
+	 .cont{
+	 	display: flex;
+	 	justify-content: space-between;
+	 	align-items: center;
+	 }
+	 .block{
+	 	width: 40px;
+	 	height: 20px;
+	 	background: #000;
+	 	margin-left:5px;
+	 	background: #165DAA;
+	 }
+	 .jun{
+	 	background: #fff;
+	 }
+	 .mid{
+	 	background: #BFD6F5;
+	 }
+	 .sen{
+	 	background: #0021C7;
+	 }
+	 .infa-block{
+	 	display: flex;
+	 	justify-content: flex-end;
+	 	margin-right: 50px;
+	 }
+	 .infa-block p{
+	 	margin-right: 30px;
+	 }
+/* Карта */
+	.my-map{
+		height: 500px;
+		margin-top: 100px;
+	}
+	.my-map iframe{
+		width: 100%;
+		height: 100%;
+	}
+    .preload{
+	 	position: absolute;
+	    z-index: 999;
+	    height: 500px;
+	    width: 100%;
+	    background: #165DAA;
+	 }  
+	#map{
+		width: 100%;
+		height: 500px;
+	}
+	.loadpr{
+	  width: 50px;
+	  height: 50px;
+	  position: relative;
+	  animation: loader 2s infinite ease-in-out;
+	  border: 4px solid #fff;
+	  left: 50%;
+	  top: 50%;
+	  animation-direction: alternate; 
+	}
+	.load-text{
+		position: absolute;
+	    left: 0;
+	    bottom: 0;
+	    justify-content: center;
+	    align-items: flex-end;
+	    display: flex;
+	    bottom: 0;
+	    height: 100%;
+	    width: 100%;
+	}
+	.load-text p{
+		font-size: 35px;
+	    color: #fff;
+	    margin-bottom: 5rem;
+	}
+	.top-content{
+		margin-top: 100px;
+	}
+/* Таймер*/
+	.infa-time{
+		display: flex;
+		align-items: flex-end;
+		justify-content: center;
+		font-size: 2rem;
+		font-weight: bold;
+		margin-top: 50px;
+	}
+		.infa-time p{
+			margin: 0 5px;
+		}
+	.time{
+		display: flex;
+
+	}
+@media screen and (max-width: 775px) {
+   .about{
+     justify-content: center;
+   }
+   .photo{
+   	margin-bottom: 50px;
+   }
+}
+@media screen and (max-width: 590px){
+	.infa-time{
+		font-size: 1.6rem;
+	}
+}	
+@media screen and (max-width: 460px){
+	.infa-block{
+		margin: 0;	
+	}
+	.block{
+		width: 30px;
+	}
+	.infa-time{
+		font-size: 1rem;
+	}
+}
+@media screen and (max-width: 390px){
+	.block{
+		width: 25px;
+		height: 15px;
+	}
+	.infa-block p{
+		margin-right: 15px;
+	}
+}
+@media screen and (max-width: 330px){
+	.infa-block{
+		font-size: 0.8rem;
+	}
+	.block{
+		width: 20px;
+	}
+}
+	@keyframes loader {
+  0% {transform: rotate(-45deg) translate(40px, 40px);}
+  50%{transform: rotate(-135deg) translate(80px, -20px);}
+  100%{transform:rotate(-225deg) translateX(-100px)}}
+
+

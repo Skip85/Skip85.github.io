@@ -353,7 +353,7 @@
               </div>
               <div class="auth-form-item auth-form-item__button-code">
                 <button
-                  :disabled="promocode == lastPromocode"
+                  :disabled="!promocode"
                   @click="applyPromo"
                   class="auth-form-button auth-form-button--alt"
                   >
@@ -385,7 +385,6 @@
       data() {
         return {
           promocode: '',
-          lastPromocode: '',
           offers: [],
           promocodeApp: null,
           errorPromocodeMessage: null,
@@ -415,10 +414,6 @@
       },
 
       methods: {
-        getOffers() {
-          this.lastPromocode = this.promocode;
-          return this.$axios.get('/v1/marketing_offers');
-        },
         async applyPromo() {
           this.errorPromocodeMessage = null;
           try { 
@@ -452,14 +447,11 @@
       },
 
       async mounted() {
+        var vm = this;
         this.errorPromocodeMessage = null;
         let auth = Cookies.getJSON('auth');
         this.$axios.defaults.headers.common['Authorization'] = _.get(auth, 'token');
-        var vm = this;
-        this.getOffers().then(function(response) {
-          vm.offers = response.data;
-        });
-
+        
         try {
           let { data: promocodes } = await this.$axios.get('/v1/promo_code_applications');
           let promocodeApp =_.find(promocodes, o => { 
@@ -483,14 +475,54 @@
 
   <div id="app">
     <div v-if="!selectedOfferId" class="actions list-offers">
-      <div class="offer-item offer-dark">
-        <button @click="selectedOfferId='ccecada5-a338-41c0-82a4-8109e02de972'">Подписка "1 месяц"</button>
-      </div>
-      <div class="offer-item offer-red">
-        <button @click="selectedOfferId='4af71452-492e-41ae-83f9-5b37aab1740f'">Подписка "Подписка на 1 год"</button>
-      </div>
-      <div class="offer-item offer-dark">
-        <button @click="selectedOfferId='52a701b3-c7c0-4a0e-bc1b-e1971a849b05'">Подписка "1 месяц подписки на TV app"</button>
+      <div v-for="(offer, id) in offers" class="offer-item">
+        <div v-if="offer.id == 'ccecada5-a338-41c0-82a4-8109e02de972'" class="offer-item__conteiner offer-dark">
+          <div class="offer-item__title">
+            {{ offer.title }}
+          </div>
+          <h2 class="offer-item__description" v-html="_.replace(offer.description, ' ₽', '&nbsp;₽')">
+          </h2>
+          <div class="offer-item__duration">
+            Подписка на {{ moment.duration(offer.duration, offer.duration_unit).humanize() }}
+          </div>
+          <div class="offer-item__first-price">
+            Обычная цена <del>{{ offer.first_interval_price }}&nbsp;₽</del>
+          </div>
+          <button @click="selectedOfferId=offer.id">{{ offer.button_text || 'Оформить подписку'}}</button>
+          <a class="offer-item_footer-link first" href="#watch">Что посмотреть за выходные?</a>
+        </div>
+
+        <div v-else-if="offer.id == '4af71452-492e-41ae-83f9-5b37aab1740f'" class="offer-item__conteiner offer-red">
+          <div class="offer-item__title">
+            {{ offer.title }}
+          </div>
+          <h2 class="offer-item__description" v-html="_.replace(offer.description, ' ₽', '&nbsp;₽')">
+          </h2>
+          <div class="offer-item__duration">
+            Подписка на {{ moment.duration(offer.duration, offer.duration_unit).humanize() }}
+          </div>
+          <div class="offer-item__first-price">
+            Обычная цена <del>{{ offer.first_interval_price }}&nbsp;₽</del>
+          </div>
+          <button @click="selectedOfferId=offer.id">{{ offer.button_text || 'Оформить подписку'}}</button>
+          <a class="offer-item_footer-link center" href="#watch">Что нового стоит посмотреть?</a>
+        </div>
+    
+        <div v-else-if="offer.id == '52a701b3-c7c0-4a0e-bc1b-e1971a849b05'" class="offer-item__conteiner offer-dark">
+          <div class="offer-item__title">
+            {{ offer.title }}
+          </div>
+          <h2 class="offer-item__description" v-html="_.replace(offer.description, ' ₽', '&nbsp;₽')">
+          </h2>
+          <div class="offer-item__duration">
+            Подписка на {{ moment.duration(offer.duration, offer.duration_unit).humanize() }}
+          </div>
+          <div class="offer-item__first-price">
+            Обычная цена <del>{{ offer.first_interval_price }}&nbsp;₽</del>
+          </div>
+          <button @click="selectedOfferId=offer.id">{{ offer.button_text || 'Оформить подписку'}}</button>
+          <a class="offer-item_footer-link third" href="#watch">Посмотреть список самого <br> популярного</a>
+        </div>
       </div>
     </div>
     <div v-else class="auth-layout">
@@ -523,6 +555,7 @@
         return {
           currentSession: null,
           selectedOfferId: null,
+          offers: [],
         };
       },
   
@@ -531,6 +564,17 @@
           this.currentSession = session;
         },
       },
+
+      async mounted() {
+        var vm = this;
+        try {
+          let { data: offers } = await this.$axios.get('/v1/marketing_offers');
+          this.offers = offers;
+        }
+        catch (err) {
+          console.error(err);
+        }
+      }
     });
   </script>
 <!-- /.Код для вставки в тильду -->

@@ -1278,6 +1278,9 @@ a.offer-item_footer-link {
 }
 
 @media screen and (max-width: 997px) {
+  .offer-red:before {
+    display: none;
+  }
   .list-offers {
     flex-direction: column;
   }

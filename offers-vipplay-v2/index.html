@@ -313,7 +313,7 @@
           <div class="info-table">
             <div class="info-table__row info-table__row-tariff">
               <div class="info-table__left">Подписка</div>
-              <div class="info-table__right">Месяц за {{ price }} ₽</div>
+              <div class="info-table__right">{{ selectedOffer.title }}</div>
             </div>
             <div class="info-table__row info-table__row-validity">
               <div class="info-table__left">Срок подписки</div>
@@ -406,7 +406,7 @@
           return _.get(this.promocodeApp, 'promo.discount');
         },
         totalPrice() {
-          return _.get(this.selectedOffer, 'price_with_discount', 0)/100 ||this.price * ((100 - (_.get(this.promocodeApp, 'promo.discount') || 0))/100);
+          return _.round(_.get(this.selectedOffer, 'price_with_discount', 0)/100 || this.price * ((100 - (_.get(this.promocodeApp, 'promo.discount') || 0))/100), 2);
         },
         subscriptionTerm() {
           return moment.duration(_.get(this.selectedOffer, 'duration'), _.get(this.selectedOffer, 'duration_unit')).humanize();

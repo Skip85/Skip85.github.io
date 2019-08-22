@@ -485,8 +485,8 @@
           <div class="offer-item__duration">
             Подписка на {{ moment.duration(offer.duration, offer.duration_unit).humanize() }}
           </div>
-          <div class="offer-item__first-price">
-            Обычная цена <del>{{ offer.first_interval_price }}&nbsp;₽</del>
+          <div v-if="offer.first_interval_price" class="offer-item__first-price">
+            Обычная цена <del>{{ (offer.first_interval_price || 0)/100 }}&nbsp;₽</del>
           </div>
           <button @click="selectedOfferId=offer.id">{{ offer.button_text || 'Оформить подписку'}}</button>
           <a class="offer-item_footer-link first" href="#watch">Что посмотреть за выходные?</a>
@@ -501,8 +501,8 @@
           <div class="offer-item__duration">
             Подписка на {{ moment.duration(offer.duration, offer.duration_unit).humanize() }}
           </div>
-          <div class="offer-item__first-price">
-            Обычная цена <del>{{ offer.first_interval_price }}&nbsp;₽</del>
+          <div v-if="offer.first_interval_price" class="offer-item__first-price">
+            Обычная цена <del>{{ (offer.first_interval_price || 0)/100 }}&nbsp;₽</del>
           </div>
           <button @click="selectedOfferId=offer.id">{{ offer.button_text || 'Оформить подписку'}}</button>
           <a class="offer-item_footer-link center" href="#watch">Что нового стоит посмотреть?</a>
@@ -517,8 +517,8 @@
           <div class="offer-item__duration">
             Подписка на {{ moment.duration(offer.duration, offer.duration_unit).humanize() }}
           </div>
-          <div class="offer-item__first-price">
-            Обычная цена <del>{{ offer.first_interval_price }}&nbsp;₽</del>
+          <div v-if="offer.first_interval_price" class="offer-item__first-price">
+            Обычная цена <del>{{ (offer.first_interval_price || 0)/100 }}&nbsp;₽</del>
           </div>
           <button @click="selectedOfferId=offer.id">{{ offer.button_text || 'Оформить подписку'}}</button>
           <a class="offer-item_footer-link third" href="#watch">Посмотреть список самого <br> популярного</a>

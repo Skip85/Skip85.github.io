@@ -1280,6 +1280,7 @@ a.offer-item_footer-link {
   }
   .offer-item__description {
     max-width: 100%;
+    text-align: center;
   }
 }
 

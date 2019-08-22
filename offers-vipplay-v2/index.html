@@ -421,8 +421,8 @@
             let { data: promocodeApp } = await this.$axios.post('/v1/promo_code_applications', {
               code: this.promocode,
             });
-            this.getPaymentUrl();
             this.promocodeApp = promocodeApp;
+            this.getPaymentUrl();
           }
           catch (err) {
             console.error(err);
@@ -439,7 +439,7 @@
                 template: 'Offer',
               }
             });
-            this.urlPayment = `${url}&phone=${_.get(this.currentSession, 'user.profile.phone_number')}&Total=${this.price}&TotalWithDiscount=${this.totalPrice}`;
+            this.urlPayment = `${url}&phone=${_.get(this.currentSession, 'user.profile.phone_number')}&Total=${this.totalPrice || this.price}&Tariff=${this.selectedOffer.title}`;
           }
           catch (err) {
             console.error(err);

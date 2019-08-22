@@ -245,6 +245,7 @@
           }
           catch(err) {
             console.error(err);
+            this.messageError = _.get(err, 'response.data.message') || 'Неизвестная ошибка';
           }
           this.disabled = false;
         },

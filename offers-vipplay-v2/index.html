@@ -48,7 +48,7 @@
     <!-- Подтверждение кода авторизации -->
     <div v-else-if="isSubmitPhone" class="auth-form-popup-container js-auth-form-popup-container js-auth-form-code">
       <div class="auth-form-popup-heading">Подтверждение</div>
-      <form class="auth-form js-auth-form" data-context="code" data-ajax action="ajax/data.php" novalidate>
+      <form class="auth-form js-auth-form" novalidate>
         <div class="auth-form-popup-text">На указанный номер телефона выслана смс с кодом для подтверждения</div>
         <div class="auth-form-group">
           <div :class="{ '__error': messageError }" class="auth-form-item auth-form-item__code js-auth-form-item">
@@ -68,7 +68,7 @@
           <div class="auth-form-item auth-form-item__button-code">
             <button
               :disabled="isDisabledCode"
-              @click="auth"
+              @click.prevent="auth"
               class="auth-form-button js-auth-form-button js-auth-form-code-button"
               >
               Подтвердить
@@ -77,9 +77,9 @@
         </div>
       </form>
       <div class="auth-form-popup-text">
-        <button v-if="replyTime >= 30" @click="getCode('reply')" class="auth-form-code-resend">Запросить новый код</button>
+        <button v-if="replyTime == 0" @click="getCode('reply')" class="auth-form-code-resend">Запросить новый код</button>
       </div>
-      <p v-if="replyTime != 30">Повторная отправка кода через: {{ replyTime }} секунд</p>
+      <p v-if="replyTime != 30 && replyTime > 0">Повторная отправка кода через: {{ replyTime }} секунд</p>
     </div>
     <!-- Авторизация -->
     <div v-else class="auth-form-popup-container">
@@ -90,13 +90,13 @@
             <a href="" @click.prevent="$oauth('vk')"><span class="auth-popup-social-item auth-popup-social-item-vk"></span></a>
             <!--<a href=""><span class="auth-popup-social-item auth-popup-social-item-gl"></span></a>-->
         </div>
-        <div class="auth-form js-auth-form" data-context="phone" data-ajax action="ajax/data.php" novalidate>
+        <div class="auth-form js-auth-form">
           <div class="auth-form-container">
             <div class="auth-form-item-title">Или по номеру телефона</div>
             <div class="auth-form-group">
               <div :class="{ '__error': messageError }" class="auth-form-item auth-form-item__phone">
                 <label>
-                  <input v-model="phone" class="phone" type="tel" name="phone" placeholder="+7 XXX XXX-XX-XX">
+                  <input @blur="setMask" v-model="phone" class="phone" type="tel" name="phone" placeholder="+7 XXX XXX-XX-XX">
                 </label>
                 <div v-if="messageError" class="auth-form-item__error">
                   <span>{{ messageError }}</span>
@@ -143,12 +143,50 @@
           session: null,
 
           replyTime: 30,
+
+          phoneCodes: [
+            '8', // Россия
+            '7', '+7', // Россия/Казахстан
+            '374', '+374', // Армения
+            '994', '+994', // Азербайджан
+            '375', '+375', // Беларусь
+            '995', '+995', // Грузия
+            '996', '+996', // Кыргыстан
+            '373', '+373', // Молдова
+            '992', '+992', // Таджикистан
+            '993', '+993', // Туркменистан
+            '380', '+380', // Украина
+            '998', '+998', // Узбекистан
+          ],
         };
       },
 
+      watch: {
+        mask() {
+          this.setMask();
+        }
+      },
+
       computed: {
+        mask() {
+          if (_.size(this.phone) < 4) return;
+          let showMask = _.some(_.map(this.phoneCodes, code => _.startsWith(this.phone, code)));
+          if (!showMask) {
+            return '+7 000 000-00-00';
+          }
+          if (_.some(_.map(['7', '8', '+7'], code => _.startsWith(this.phone, code)))) {
+            return '+7 000 000-00-00';
+          }
+          if (_.some(_.map(['+374', '+994', '+375', '+995', '+996', '+373', '+992', '+993', '+380', '+998', ], code => _.startsWith(this.phone, code)))) {
+            return `${this.phone.substr(0, 4)} 00 000-00-00`;
+          }
+          if (_.some(_.map(['374', '994', '375', '995', '996', '373', '992', '993', '380', '998'], code => _.startsWith(this.phone, code)))) {
+            return `+${this.phone.substr(0, 3)} 00 000-00-00`;
+          }
+          return '+7 000 000-00-00';
+        },
         isDisabledPhone() {
-          return !this.phone || this.convertedPhone.length < this.convertedPlaceholder().length || !this.agree || this.disabled;
+          return !this.phone || !this.mask || _.size(_.replace(this.phone, /[^\d]/g, '')) < _.size(_.replace(this.mask, /[^\d]/g, '')) || !this.agree || this.disabled;
         },
         isDisabledCode() {
           return !this.code || this.disabled;
@@ -183,6 +221,22 @@
             return (!placeholder || !placeholder.match(/X/g)) ? [] : placeholder.match(/X/g).join('');
           }
         },
+        setMask() {
+          let isMasked = false;
+          try {
+            $('.phone').masked();
+            isMasked = true;
+          }
+          catch (err) {
+            isMasked = false;
+          }
+
+          if (isMasked) $('.phone').unmask();
+          if (!this.mask) return;
+
+          $('.phone').mask(this.mask);
+          this.phone = $('.phone').masked();
+        },
         async getCode(reply) {
           let vm = this;
           if (!this.phone) return;
@@ -201,10 +255,11 @@
               this.isSubmitPhone = false;
             }
           }
+          this.replyTime = 30;
           var timer = setInterval(function() {
             if (vm.replyTime <= 0) {
               clearInterval(timer);
-              vm.replyTime = 30;
+              vm.replyTime = 0;
             }
             else {
               vm.replyTime--;
@@ -320,10 +375,6 @@
               <div class="info-table__left">Срок подписки</div>
               <div class="info-table__right">{{ subscriptionTerm }}</div>
             </div>
-            <div class="info-table__row info-table__row-old-price">
-              <div class="info-table__left">Старая цена</div>
-              <div class="info-table__right">{{ oldPrice }} ₽</div>
-            </div>
             <div v-if="promocodeApp" class="info-table__row info-table__row-discount">
               <div class="info-table__left">Скидка по промокоду</div>
               <div class="info-table__right"> {{ discount }}%</div>
@@ -399,9 +450,6 @@
       computed: {
         price() {
           return _.get(this.selectedOffer, 'price')/100;
-        },
-        oldPrice() {
-          return _.get(this.selectedOffer, 'first_interval_price')/100;
         },
         discount() {
           return _.get(this.promocodeApp, 'promo.discount');
@@ -540,7 +588,6 @@
   <script>
     /* config */
     moment.locale('ru');
-    $('.phone').mask('+7 000 000-00-00');
     $('.auth-code').mask('0000');
 
     // регистрирую специальный инстанс аксиоса

@@ -33,6 +33,7 @@
 .auth-form-popup.__opened {
   opacity: 1;
   visibility: visible;
+  overflow: auto;
 }
 
 @media (max-width: 479px) {
@@ -897,6 +898,10 @@
   height: 100%;
 }
 
+.info-table {
+  display: flex;
+  flex-direction: column;
+}
 @media (max-width: 992px) {
   .info-table {
     display: -webkit-flex;
@@ -986,12 +991,6 @@
   text-transform: uppercase;
 }
 
-@media (max-width: 992px) {
-  .info-table__row-tariff .info-table__left {
-    display: none;
-  }
-}
-
 .info-table__row-tariff .info-table__right {
   font-family: "Effra", "Effra local", "Arial", sans-serif;
   font-weight: bold;
@@ -1010,8 +1009,11 @@
 }
 
 @media (max-width: 992px) {
+  .info-table__row-validity, .info-table__row-tariff, .info-table__row-old-price, .info-table__row-discount {
+    width: 100%;
+  }
+  
   .info-table__row-validity {
-    width: calc(50% - 20px);
     border-top: 1px dotted rgba(255, 255, 255, 0.25) !important;
   }
   .info-table__row-validity + .info-table__row {
@@ -1019,38 +1021,8 @@
   }
 }
 
-@media (max-width: 767px) {
-  .info-table__row-validity {
-    width: 100%;
-  }
-}
-
-@media (max-width: 992px) {
-  .info-table__row-old-price {
-    width: calc(50% - 20px);
-  }
-}
-
-@media (max-width: 767px) {
-  .info-table__row-old-price {
-    width: 100%;
-  }
-}
-
 .info-table__row-old-price .info-table__right {
   text-decoration: line-through;
-}
-
-@media (max-width: 992px) {
-  .info-table__row-discount {
-    width: calc(50% - 20px);
-  }
-}
-
-@media (max-width: 767px) {
-  .info-table__row-discount {
-    width: 100%;
-  }
 }
 
 .info-table__row-price {
@@ -1062,9 +1034,9 @@
     width: 100%;
     padding: 0;
     border: none !important;
-    -webkit-justify-content: flex-start;
-        -ms-flex-pack: start;
-            justify-content: flex-start;
+    -webkit-justify-content: space-between;
+        -ms-flex-pack: space-between;
+            justify-content: space-between;
   }
 }
 
@@ -1221,6 +1193,9 @@
 }
 
 .offer-item__title {
+  font-size: 18px;
+  font-family: 'Effra' ,Arial, sans-serif;
+  font-weight: bold;
   opacity: .8;
   margin-bottom: 10px;
   text-transform: uppercase;

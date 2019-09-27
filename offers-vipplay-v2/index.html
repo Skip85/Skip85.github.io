@@ -416,7 +416,7 @@
             </div>
             <div class="auth-form-group">
               <div class="auth-form-item offer-form-item__button">
-                <a class="auth-form-button" target="_blank" :disabled="!urlPayment" :href="urlPayment">Перейти к оплате</a>
+                <a class="auth-form-button" @click.prevent="getPaymentUrl">Перейти к оплате</a>
               </div>
             </div>
           </div>
@@ -470,7 +470,6 @@
               code: this.promocode,
             });
             this.promocodeApp = promocodeApp;
-            this.getPaymentUrl();
           }
           catch (err) {
             console.error(err);
@@ -479,7 +478,7 @@
         },
         async getPaymentUrl() {
           try {
-            let {data: { url }} = await this.$axios.post('/v1/payment_methods', null, {
+            let { data: { url }} = await this.$axios.post('/v1/payment_methods', null, {
               params: {
                 offer_id: this.selectedOfferId,
                 promo_code_application_id: _.get(this.promocodeApp, 'id'),
@@ -488,7 +487,8 @@
                 return_url: 'https://offer.vipplay.ru/payment/{success}',
               }
             });
-            this.urlPayment = `${url}&phone=${_.get(this.currentSession, 'user.profile.phone_number')}&Total=${this.totalPrice || this.price}&Tariff=${this.selectedOffer.title}`;
+            this.urlPayment = url;
+            window.location.href = this.urlPayment;
           }
           catch (err) {
             console.error(err);
@@ -514,7 +514,6 @@
           });
           this.selectedOffer = selectedOffer;
           this.promocodeApp = promocodeApp;
-          this.getPaymentUrl();
         }
         catch (err) {
           console.error(err);

@@ -416,7 +416,7 @@
             </div>
             <div class="auth-form-group">
               <div class="auth-form-item offer-form-item__button">
-                <a class="auth-form-button" @click.prevent="getPaymentUrl">Перейти к оплате</a>
+                <a class="auth-form-button" :disabled="disabledPayLink" @click.prevent="getPaymentUrl">Перейти к оплате</a>
               </div>
             </div>
           </div>
@@ -443,6 +443,7 @@
           selectedOffer: null,
 
           urlPayment: null,
+          disabledPayLink: false,
         };
       },
 
@@ -478,6 +479,7 @@
         },
         async getPaymentUrl() {
           try {
+            this.disabledPayLink = true;
             let { data: { url }} = await this.$axios.post('/v1/payment_methods', null, {
               params: {
                 offer_id: this.selectedOfferId,
@@ -494,6 +496,7 @@
           catch (err) {
             console.error(err);
           }
+          this.disabledPayLink = false;
         },
       },
 

@@ -460,6 +460,10 @@
         },
         subscriptionTerm() {
           return moment.duration(_.get(this.selectedOffer, 'duration'), _.get(this.selectedOffer, 'duration_unit')).humanize();
+        },
+        cardHolder() {
+          let profile = _.get(this.currentSession, 'user.profile');
+          return _.get(profile, 'phone_number') || _.get(profile, 'email') || _.get(profile, 'name');
         }
       },
 
@@ -487,7 +491,7 @@
                 '3ds':'3ds',
                 template: 'Offer',
                 return_url: 'https://offer.vipplay.ru/payment/{success}',
-                'additional_params[Phone]': _.get(this.currentSession, 'user.profile.phone_number'),
+                'additional_params[Cardholder]': this.cardHolder,
               }
             });
             this.urlPayment = url;

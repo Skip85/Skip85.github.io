@@ -302,8 +302,8 @@
 
 .offer-form-popup-heading {
   font-family: "Effra", "Effra local", "Arial", sans-serif;
-  font-size: 50px;
-  line-height: 60px;
+  font-size: 18px;
+  line-height: 30px;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -312,7 +312,7 @@
 
 @media (max-width: 767px) {
   .offer-form-popup-heading {
-    font-size: 25px;
+    font-size: 18px;
     line-height: 30px;
   }
 }

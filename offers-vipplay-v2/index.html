@@ -30,6 +30,7 @@
   <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap" rel="stylesheet">
   <link href="assets/style.css" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment-with-locales.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.min.js"></script>
 
   <script src="assets/jquery.mask.min.js"></script>
   <script src="assets/script.js"></script>
@@ -233,9 +234,17 @@
 
           if (isMasked) $('.phone').unmask();
           if (!this.mask) return;
+            
+          if (_.first(this.phone) == '8') {
+            this.phone = _.replace(this.phone, '8', '7');
+          }
+          this.$nextTick(() => {
+            $('.phone').mask(this.mask);
+            this.phone = $('.phone').masked();
+            $('.phone')[0].setSelectionRange(_.size(this.phone),_.size(this.phone));
+          });
 
-          $('.phone').mask(this.mask);
-          this.phone = $('.phone').masked();
+          
         },
         async getCode(reply) {
           let vm = this;
@@ -243,6 +252,28 @@
 
           try {
             this.disabled = true;
+            /* let base64 = CryptoJS.enc.Base64;
+            let md5 = CryptoJS.MD5;
+            let utf16 = CryptoJS.enc.Utf16;
+            const encReqBody = base64.stringify(md5(JSON.stringify({ msisdn: this.convertedPhone })));
+            const reqCTHeader = 'application/json';
+            const reqType = 'POST';
+            const platformDate = (new Date()).toUTCString();
+            const uriString = '/api/v2/auth_codes';
+
+            const stringForEncr = `${reqType},${reqCTHeader},${encReqBody},${uriString},${platformDate}`;
+
+            const platformLogin = 'web';
+            const platformToken = await this.$axios.post('/auth/platform_token/', { str: base64.stringify(utf16.parse(stringForEncr)) }, { baseURL: '/' });
+            debugger
+            await this.$axios.post('/v2/auth_codes', { msisdn: this.convertedPhone }, {
+              headers: {
+                'Content-Type': reqCTHeader,
+                'Http-Date': platformDate,
+                'Content-MD5': encReqBody,
+                'Authorization': `APIAuth ${platformLogin}:${platformToken}`,
+              },
+            }); */
             await this.$axios.post(`/v1/auth_codes`, {
               msisdn: this.convertedPhone,
             });

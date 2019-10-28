@@ -1,13 +1,13 @@
 @font-face {
   font-family: 'Effra local';
-  src: url("fonts/Dalton-Maag-Effra.woff") format("woff");
+  src: url("assets/fonts/Dalton-Maag-Effra.woff") format("woff"), url("fonts/Dalton-Maag-Effra.woff") format("woff");
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Effra local';
-  src: url("fonts/Dalton-Maag-Effra-Bold.woff") format("woff");
+  src: url("assets/fonts/Dalton-Maag-Effra-Bold.woff") format("woff"), url("fonts/Dalton-Maag-Effra-Bold.woff") format("woff");
   font-weight: bold;
   font-style: normal;
 }
@@ -1156,7 +1156,7 @@
 
 .offer-item__conteiner * {
   color: #fff;
-  font-family: 'Effra' ,Arial, sans-serif;
+  font-family: "Effra", "Effra local", Arial, sans-serif;
 }
 
 .offer-item__conteiner button {
@@ -1194,7 +1194,7 @@
 
 .offer-item__title {
   font-size: 18px;
-  font-family: 'Effra' ,Arial, sans-serif;
+  font-family: "Effra", "Effra local", Arial, sans-serif;
   font-weight: bold;
   opacity: .8;
   margin-bottom: 10px;

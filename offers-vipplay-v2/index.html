@@ -514,7 +514,7 @@
         async getPaymentUrl() {
           try {
             this.disabledPayLink = true;
-            let { data: { url }} = await this.$axios.post('/v1/payment_methods', null, {
+            let { data: { url }} = await this.$axios.post('/v2/payment_methods', null, {
               params: {
                 offer_id: this.selectedOfferId,
                 promo_code_application_id: _.get(this.promocodeApp, 'id'),

@@ -264,7 +264,7 @@
             const stringForEncr = `${reqType},${reqCTHeader},${encReqBody},${uriString},${platformDate}`;
 
             const platformLogin = 'web';
-            const platformToken = await this.$axios.post('https://vipplay.ru/auth/platform_token/', { str: base64.stringify(utf16.parse(stringForEncr)) });
+            const { data: platformToken } = await this.$axios.post('https://vipplay.ru/auth/platform_token/', { str: base64.stringify(utf16.parse(stringForEncr)) });
             await this.$axios.post('/v2/auth_codes', { msisdn: this.convertedPhone }, {
               headers: {
                 'Content-Type': reqCTHeader,

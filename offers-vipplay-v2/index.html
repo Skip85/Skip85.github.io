@@ -46,13 +46,15 @@
         Сейчас мы перенаправим вас на страницу <br>подтверждения подписки
       </div>
     </div>
+
     <!-- Подтверждение кода авторизации -->
     <div v-else-if="isSubmitPhone" class="auth-form-popup-container js-auth-form-popup-container js-auth-form-code">
       <div class="auth-form-popup-heading">Подтверждение</div>
       <form class="auth-form js-auth-form" novalidate>
-        <div class="auth-form-popup-text">На указанный номер телефона выслана смс с кодом для подтверждения</div>
+        <div v-if="messageError.authCode" class="auth-form-popup-text">{{ messageError.authCode }}</div>
+        <div v-else class="auth-form-popup-text">На указанный номер телефона выслана смс с кодом для подтверждения</div>
         <div class="auth-form-group">
-          <div :class="{ '__error': messageError }" class="auth-form-item auth-form-item__code js-auth-form-item">
+          <div :class="{ '__error': messageError.session }" class="auth-form-item auth-form-item__code js-auth-form-item">
             <label>
               <input
                 v-model="code"
@@ -62,8 +64,8 @@
                 placeholder="XXXX"
                 >
             </label>
-            <span v-if="messageError" class="auth-form-item__error">
-              <span>{{ messageError }}</span>
+            <span v-if="messageError.session" class="auth-form-item__error">
+              <span>{{ messageError.session }}</span>
             </span>
           </div>
           <div class="auth-form-item auth-form-item__button-code">
@@ -82,6 +84,7 @@
       </div>
       <p v-if="replyTime != 30 && replyTime > 0">Повторная отправка кода через: {{ replyTime }} секунд</p>
     </div>
+
     <!-- Авторизация -->
     <div v-else class="auth-form-popup-container">
       <div class="auth-form-popup-heading">Войдите или зарегистрируйтесь</div>
@@ -95,12 +98,12 @@
           <div class="auth-form-container">
             <div class="auth-form-item-title">Или по номеру телефона</div>
             <div class="auth-form-group">
-              <div :class="{ '__error': messageError }" class="auth-form-item auth-form-item__phone">
+              <div :class="{ '__error': messageError.authCode }" class="auth-form-item auth-form-item__phone">
                 <label>
                   <input @blur="setMask" v-model="phone" class="phone" type="tel" name="phone" placeholder="+7 XXX XXX-XX-XX">
                 </label>
-                <div v-if="messageError" class="auth-form-item__error">
-                  <span>{{ messageError }}</span>
+                <div v-if="messageError.authCode" class="auth-form-item__error">
+                  <span>{{ messageError.authCode }}</span>
                 </div>
               </div>
               <div class="auth-form-item auth-form-item__button">
@@ -139,7 +142,10 @@
           disabled: false,
           agree: true,
 
-          messageError: null,
+          messageError: {
+            authCode: null,
+            session: null,
+          },
 
           session: null,
 
@@ -276,15 +282,13 @@
             /* await this.$axios.post(`/v1/auth_codes`, {
               msisdn: this.convertedPhone,
             }); */
-            this.isSubmitPhone = true;
           }
           catch(err) {
             console.error(err);
-            this.messageError = _.get(err, 'response.data.message') || 'Неизвестная ошибка';
-            if (!reply) {
-              this.isSubmitPhone = false;
-            }
+            this.messageError.authCode = 'Мы не смогли отправить смс на Ваш номер телефона. Введите постоянный пинкод или обратитесь в службу поддержки';
           }
+  
+          this.isSubmitPhone = true;
           this.replyTime = 30;
           var timer = setInterval(function() {
             if (vm.replyTime <= 0) {
@@ -330,7 +334,7 @@
           }
           catch(err) {
             console.error(err);
-            this.messageError = _.get(err, 'response.data.message') || 'Неизвестная ошибка';
+            this.messageError.session = _.get(err, 'response.data.message') || 'Неизвестная ошибка';
           }
           this.disabled = false;
         },

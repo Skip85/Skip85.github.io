@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex">
+  <title>Форма авторизации</title>
+</head>
+<style>
+  html,body {
+    margin: 0;
+    height: 100%;
+  }
+</style>
+<body>
+  <!-- Это для запуска локально -->
+  <script src="assets/jquery-1.10.2.min.js"></script>
+
+  <!-- Код для вставки в тильду -->
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.11/lodash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+  <script src="https://unpkg.com/async-oauth-popup@1.0.3/dist/index.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.7.0/qs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@16.0.1/build/js/intlTelInput.js"></script>
+
+  <link href="https://cdn.jsdelivr.net/npm/intl-tel-input@16.0.1/build/css/intlTelInput.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap" rel="stylesheet">
+  <link href="assets/style.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment-with-locales.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.min.js"></script>
+
+  <script src="assets/jquery.mask.min.js"></script>
+  <script src="assets/script.js"></script>
+  <script src="assets/jwt-decode.min.js"></script>
+  <script src="assets/oauth.js"></script>
+
+  <!-- @NOTE: объявляю шаблоны компонентов через text/x-template https://ru.vuejs.org/v2/guide/components-edge-cases.html#X-Templates -->
+  <script type="text/x-template" id="vue-auth-template">  <!-- компонент авторизации -->
+    <!-- Успешная авторизация -->
+    <div v-if="session" class="auth-form-popup-container auth-form-popup-container-success js-auth-form-popup-container js-auth-form-success">
+      <div class="auth-form-popup-heading">Вы успешно авторизованы</div>
+      <div class="auth-form-popup-text">
+        Сейчас мы перенаправим вас на страницу <br>подтверждения подписки
+      </div>
+    </div>
+
+    <!-- Подтверждение кода авторизации -->
+    <div v-else-if="isSubmitPhone" class="auth-form-popup-container js-auth-form-popup-container js-auth-form-code">
+      <div class="auth-form-popup-heading">Подтверждение</div>
+      <form class="auth-form js-auth-form" novalidate>
+        <div v-if="messageError.authCode" class="auth-form-popup-text">{{ messageError.authCode }}</div>
+        <div v-else class="auth-form-popup-text">На указанный номер телефона выслана смс с кодом для подтверждения</div>
+        <div class="auth-form-group">
+          <div :class="{ '__error': messageError.session }" class="auth-form-item auth-form-item__code js-auth-form-item">
+            <label>
+              <input
+                v-model="code"
+                class="auth-code"
+                type="text"
+                name="code"
+                placeholder="XXXX"
+                >
+            </label>
+            <span v-if="messageError.session" class="auth-form-item__error">
+              <span>{{ messageError.session }}</span>
+            </span>
+          </div>
+          <div class="auth-form-item auth-form-item__button-code">
+            <button
+              :disabled="isDisabledCode"
+              @click.prevent="auth"
+              class="auth-form-button js-auth-form-button js-auth-form-code-button"
+              >
+              Подтвердить
+            </button>
+          </div>
+        </div>
+      </form>
+      <div class="auth-form-popup-text">
+        <button v-if="replyTime == 0" @click="getCode('reply')" class="auth-form-code-resend">Запросить новый код</button>
+      </div>
+      <p v-if="replyTime != 30 && replyTime > 0">Повторная отправка кода через: {{ replyTime }} секунд</p>
+    </div>
+
+    <!-- Авторизация -->
+    <div v-else class="auth-form-popup-container">
+      <div class="auth-form-popup-heading">Войдите или зарегистрируйтесь</div>
+        <div class="auth-popup-social">
+            <div class="auth-form-item-title">Через социальные сети</div>
+            <a href="" @click.prevent="$oauth('fb')"><span class="auth-popup-social-item auth-popup-social-item-fb"></span></a>
+            <a href="" @click.prevent="$oauth('vk')"><span class="auth-popup-social-item auth-popup-social-item-vk"></span></a>
+            <!--<a href=""><span class="auth-popup-social-item auth-popup-social-item-gl"></span></a>-->
+        </div>
+        <div class="auth-form js-auth-form">
+          <div class="auth-form-container">
+            <div class="auth-form-item-title">Или по номеру телефона</div>
+            <div class="auth-form-group">
+              <div :class="{ '__error': messageError.authCode }" class="auth-form-item auth-form-item__phone">
+                <label>
+                  <input @blur="setMask" v-model="phone" class="phone" type="tel" name="phone" placeholder="+7 XXX XXX-XX-XX">
+                </label>
+                <div v-if="messageError.authCode" class="auth-form-item__error">
+                  <span>{{ messageError.authCode }}</span>
+                </div>
+              </div>
+              <div class="auth-form-item auth-form-item__button">
+                <button
+                  @click.prevent="getCode"
+                  :disabled="isDisabledPhone"
+                  class="auth-form-button"
+                  >
+                  Далее
+                </button>
+              </div>
+              <div :class="{ '__error': !agree }" class="auth-form-item auth-form-item__checkbox js-auth-form-item">
+                <label>
+                  <input v-model="agree" class="auth-form-item-field js-auth-form-item-field" type="checkbox" name="agree">
+                  <span class="auth-form-item-label">
+                      Я&nbsp;подтверждаю, что ознакомился и&nbsp;принимаю <a href="" target="_blank">условия политики конфиденциальности</a>
+                      и&nbsp;<a href="" target="_blank">пользовательского соглашения</a>
+                      <span class="auth-form-item__error-inline">Это обязательное поле</span>
+                  </span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+  </script>
+  <script>
+    Vue.component('vue-auth', {
+      template: '#vue-auth-template',
+      data() {
+        return {
+          isSubmitPhone: false,
+          code: null,
+          phone: null,
+          session: null,
+          disabled: false,
+          agree: true,
+
+          messageError: {
+            authCode: null,
+            session: null,
+          },
+
+          session: null,
+
+          replyTime: 30,
+
+          phoneCodes: [
+            '8', // Россия
+            '7', '+7', // Россия/Казахстан
+            '374', '+374', // Армения
+            '994', '+994', // Азербайджан
+            '375', '+375', // Беларусь
+            '995', '+995', // Грузия
+            '996', '+996', // Кыргыстан
+            '373', '+373', // Молдова
+            '992', '+992', // Таджикистан
+            '993', '+993', // Туркменистан
+            '380', '+380', // Украина
+            '998', '+998', // Узбекистан
+          ],
+        };
+      },
+
+      watch: {
+        mask() {
+          this.setMask();
+        }
+      },
+
+      computed: {
+        mask() {
+          if (_.size(this.phone) < 4) return;
+          let showMask = _.some(_.map(this.phoneCodes, code => _.startsWith(this.phone, code)));
+          if (!showMask) {
+            return '+7 000 000-00-00';
+          }
+          if (_.some(_.map(['7', '8', '+7'], code => _.startsWith(this.phone, code)))) {
+            return '+7 000 000-00-00';
+          }
+          if (_.some(_.map(['+374', '+994', '+375', '+995', '+996', '+373', '+992', '+993', '+380', '+998', ], code => _.startsWith(this.phone, code)))) {
+            return `${this.phone.substr(0, 4)} 00 000-00-00`;
+          }
+          if (_.some(_.map(['374', '994', '375', '995', '996', '373', '992', '993', '380', '998'], code => _.startsWith(this.phone, code)))) {
+            return `+${this.phone.substr(0, 3)} 00 000-00-00`;
+          }
+          return '+7 000 000-00-00';
+        },
+        isDisabledPhone() {
+          return !this.phone || !this.mask || _.size(_.replace(this.phone, /[^\d]/g, '')) < _.size(_.replace(this.mask, /[^\d]/g, '')) || !this.agree || this.disabled;
+        },
+        isDisabledCode() {
+          return !this.code || this.disabled;
+        },
+        currentSessionId() {
+          let token = _.get(this.session, 'auth.token');
+          if (!token) {
+            return;
+          }
+
+          try {
+            let jwt = jwt_decode(token);
+            return jwt.session_id;
+          }
+          catch (err) {
+            console.error('Unexpected situation: bad jwt token');
+          }
+        },
+        convertedPhone() {
+          if (!this.phone || !this.phone.match(/\d/g)) return [];
+          return this.phone.match(/\d/g).join('');
+        },
+      },
+  
+      methods: {
+        convertedPlaceholder() {
+          let phoneEl = document.querySelector('[name="phone"]');
+          if (!phoneEl) {
+            return [];
+          } else {
+            let placeholder = phoneEl.getAttribute('placeholder');
+            return (!placeholder || !placeholder.match(/X/g)) ? [] : placeholder.match(/X/g).join('');
+          }
+        },
+        setMask() {
+          let isMasked = false;
+          try {
+            $('.phone').masked();
+            isMasked = true;
+          }
+          catch (err) {
+            isMasked = false;
+          }
+
+          if (isMasked) $('.phone').unmask();
+          if (!this.mask) return;
+            
+          if (_.first(this.phone) == '8') {
+            this.phone = _.replace(this.phone, '8', '7');
+          }
+          this.$nextTick(() => {
+            $('.phone').mask(this.mask);
+            this.phone = $('.phone').masked();
+            $('.phone')[0].setSelectionRange(_.size(this.phone),_.size(this.phone));
+          });
+
+          
+        },
+        async getCode(reply) {
+          let vm = this;
+          if (!this.phone) return;
+
+          try {
+            this.disabled = true;
+            let base64 = CryptoJS.enc.Base64;
+            let md5 = CryptoJS.MD5;
+            let utf16 = CryptoJS.enc.Utf16;
+            const encReqBody = base64.stringify(md5(JSON.stringify({ msisdn: this.convertedPhone })));
+            const reqCTHeader = 'application/json';
+            const reqType = 'POST';
+            const platformDate = (new Date()).toUTCString();
+            const uriString = '/api/v2/auth_codes';
+
+            const stringForEncr = `${reqType},${reqCTHeader},${encReqBody},${uriString},${platformDate}`;
+
+            const platformLogin = 'web';
+            const { data: platformToken } = await this.$axios.post('https://vipplay.ru/auth/platform_token/', { str: base64.stringify(utf16.parse(stringForEncr)) });
+            await this.$axios.post('/v2/auth_codes', { msisdn: this.convertedPhone }, {
+              headers: {
+                'Content-Type': reqCTHeader,
+                'Http-Date': platformDate,
+                'Content-MD5': encReqBody,
+                'Authorization': `APIAuth ${platformLogin}:${platformToken}`,
+              },
+            });
+            /* await this.$axios.post(`/v1/auth_codes`, {
+              msisdn: this.convertedPhone,
+            }); */
+          }
+          catch(err) {
+            console.error(err);
+            this.messageError.authCode = 'Мы не смогли отправить смс на Ваш номер телефона. Введите постоянный пинкод или обратитесь в службу поддержки';
+          }
+  
+          this.isSubmitPhone = true;
+          this.replyTime = 30;
+          var timer = setInterval(function() {
+            if (vm.replyTime <= 0) {
+              clearInterval(timer);
+              vm.replyTime = 0;
+            }
+            else {
+              vm.replyTime--;
+            }
+          }, 1000);
+          this.disabled = false;
+        },
+        
+        async auth(provider, popupCode, redirectUri) {
+          var auth = {};
+          if (popupCode) {
+            auth = {
+              provider: provider,
+              code: popupCode,
+              redirect_uri: redirectUri,
+            }
+          }
+          else {
+            auth =  {
+              msisdn: this.convertedPhone,
+              auth_code: this.code,
+            }
+          }
+
+          try {
+            this.disabled = true;
+            let response = await this.$axios.post(`/v1/sessions?user_parameters[offer_landing]=offer.vipplay.ru`, {
+              ...auth
+            });
+
+            this.isSubmitPhone = false;
+            this.code = null;
+
+            this.session = response.data;
+            Cookies.set('auth', this.session.auth, { expires: 7, path: '/' }); // 7d
+            this.$axios.defaults.headers.common['Authorization'] = this.session.auth.token;
+            this.$emit('session-update', this.session);
+          }
+          catch(err) {
+            console.error(err);
+            this.messageError.session = _.get(err, 'response.data.message') || 'Неизвестная ошибка';
+          }
+          this.disabled = false;
+        },
+
+        async logout() {
+          try {
+            await this.$axios.delete(`/v1/sessions/${this.currentSessionId}`);
+            this.session = null;
+            Cookies.remove('auth');
+            delete this.$axios.defaults.headers.common['Authorization'];
+            this.$emit('session-update', null);
+          }
+          catch(err) {
+            console.error(err);
+          }
+        },
+
+        async $oauth(provider) {
+          const {response, providerConfig} = await oauth(provider); // oauth.js
+
+          try {
+            await this.auth(providerConfig.name, response.code, providerConfig.redirectUri);
+          }
+          catch (err) {
+            alert(err.response.data.message);
+          }
+        },
+      },
+  
+      async mounted() {
+        let auth = Cookies.getJSON('auth');
+        if (!auth) return;
+
+        this.$axios.defaults.headers.common['Authorization'] = auth.token;
+
+        try {
+          let response = await this.$axios.get(`/v1/profile`);
+          this.session = {
+            auth: auth,
+            user: response.data,
+          };
+          this.$emit('session-update', this.session);
+        }
+        catch(err) {
+          console.error(err);
+        }
+      }
+    });
+  </script>
+
+
+
+  <!-- @NOTE: объявляю шаблоны компонентов через text/x-template https://ru.vuejs.org/v2/guide/components-edge-cases.html#X-Templates -->
+  <script type="text/x-template" id="vue-offers-template">  <!-- компонент предложений -->
+    <div class="offer-wrap">
+      <div class="offer-form-popup-container">
+        <div class="offer-form-popup-left">
+          <div class="offer-step">шаг 1 из 2</div>
+          <div class="offer-form-popup-heading">Подтверждение</div>
+          <div class="offer-form-popup-text">
+            Вы можете отменить подписку в любой момент
+            в своем личном кабинете.
+          </div>
+        </div>
+        <div v-if="selectedOffer" class="offer-form-popup-right">
+          <div class="info-table">
+            <div class="info-table__row info-table__row-tariff">
+              <div class="info-table__left">Подписка</div>
+              <div class="info-table__right">{{ selectedOffer.title }}</div>
+            </div>
+            <div class="info-table__row info-table__row-validity">
+              <div class="info-table__left">Срок подписки</div>
+              <div class="info-table__right">{{ subscriptionTerm }}</div>
+            </div>
+            <div v-if="promocodeApp" class="info-table__row info-table__row-discount">
+              <div class="info-table__left">Скидка по промокоду</div>
+              <div class="info-table__right"> {{ discount }}%</div>
+            </div>
+            <div class="info-table__row info-table__row-price">
+              <div class="info-table__left">итого</div>
+              <div class="info-table__right">{{ totalPrice }} ₽</div>
+            </div>
+          </div>
+        </div>
+        <div class="offer-form-popup-left">
+          <div class="offer-promocode">
+            <div class="auth-form-item-title">Промокод</div>
+            <div class="auth-form-group">
+              <div class="auth-form-item auth-form-item__code js-auth-form-item">
+                <label>
+                  <input
+                    v-model="promocode"
+                    class="auth-form-item-field js-auth-form-item-field js-auth-form-code-field"
+                    type="text"
+                    name="code"
+                    placeholder="XXXXX"
+                  >
+                </label>
+                <span class="auth-form-item__error">
+                  <span></span>
+                </span>
+              </div>
+              <div class="auth-form-item auth-form-item__button-code">
+                <button
+                  :disabled="!promocode"
+                  @click="applyPromo"
+                  class="auth-form-button auth-form-button--alt"
+                  >
+                  Применить
+                </button>
+              </div>
+              <div v-if="errorPromocodeMessage" class="offer-form-error" data-prefix="Ошибка.">{{ errorPromocodeMessage }}</div>
+            </div>
+            <div class="auth-form-group">
+              <div class="auth-form-item offer-form-item__button">
+                <a class="auth-form-button" :disabled="disabledPayLink" @click.prevent="getPaymentUrl">Перейти к оплате</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="offer-footer">Мы гарантируем безопасность ваших данных</div>
+    </div>
+  </script>
+  <script>
+    Vue.component('vue-offers', {
+      template: '#vue-offers-template',
+
+      props: {
+        currentSession: { type: Object, required: true },
+        selectedOfferId: { type: String, default: 'ccecada5-a338-41c0-82a4-8109e02de972' },
+      },
+  
+      data() {
+        return {
+          promocode: '',
+          offers: [],
+          promocodeApp: null,
+          errorPromocodeMessage: null,
+          selectedOffer: null,
+
+          urlPayment: null,
+          disabledPayLink: false,
+        };
+      },
+
+
+      computed: {
+        price() {
+          return _.get(this.selectedOffer, 'price')/100;
+        },
+        discount() {
+          return _.get(this.promocodeApp, 'promo.discount');
+        },
+        totalPrice() {
+          return _.round(_.get(this.selectedOffer, 'price_with_discount', 0)/100 || this.price * ((100 - (_.get(this.promocodeApp, 'promo.discount') || 0))/100), 2);
+        },
+        subscriptionTerm() {
+          return moment.duration(_.get(this.selectedOffer, 'duration'), _.get(this.selectedOffer, 'duration_unit')).humanize();
+        },
+        cardHolder() {
+          let profile = _.get(this.currentSession, 'user.profile');
+          return _.get(profile, 'phone_number') || _.get(profile, 'email') || _.get(profile, 'name');
+        }
+      },
+
+      methods: {
+        async applyPromo() {
+          this.errorPromocodeMessage = null;
+          try { 
+            let { data: promocodeApp } = await this.$axios.post('/v1/promo_code_applications', {
+              code: this.promocode,
+            });
+            this.promocodeApp = promocodeApp;
+          }
+          catch (err) {
+            console.error(err);
+            this.errorPromocodeMessage = _.get(err, 'response.data.message') || 'Промокод не подходит к данной подписке';
+          }
+        },
+        async getPaymentUrl() {
+          try {
+            this.disabledPayLink = true;
+            let { data: { url }} = await this.$axios.post('/v2/payment_methods', null, {
+              params: {
+                offer_id: this.selectedOfferId,
+                promo_code_application_id: _.get(this.promocodeApp, 'id'),
+                '3ds':'3ds',
+                template: 'Offer',
+                return_url: 'https://offer.vipplay.ru/payment/{success}',
+                'additional_params[Cardholder]': this.cardHolder,
+              }
+            });
+            this.urlPayment = url;
+            window.location.href = this.urlPayment;
+          }
+          catch (err) {
+            console.error(err);
+          }
+          this.disabledPayLink = false;
+        },
+      },
+
+      async mounted() {
+        var vm = this;
+        this.errorPromocodeMessage = null;
+        let auth = Cookies.getJSON('auth');
+        this.$axios.defaults.headers.common['Authorization'] = _.get(auth, 'token');
+        
+        try {
+          let { data: promocodes } = await this.$axios.get('/v1/promo_code_applications');
+          let promocodeApp =_.find(promocodes, o => { 
+            return _.find(o.promo.offers, { id: this.selectedOfferId}) && moment(o.ends_at) > Date.now();
+          });
+          let { data: selectedOffer } = await this.$axios.get(`/v1/marketing_offers/${this.selectedOfferId}`, {
+            params: {
+              promo_application_id: _.get(promocodeApp, 'id'),
+            }
+          });
+          this.selectedOffer = selectedOffer;
+          this.promocodeApp = promocodeApp;
+        }
+        catch (err) {
+          console.error(err);
+        }
+      },
+    });
+  </script>
+
+  <div id="app">
+    <div v-if="!selectedOfferId" class="actions list-offers">
+      <div v-for="(offer, id) in offers" class="offer-item">
+        <div v-if="offer.id == '7a1a0b4a-1f44-4b35-a3a6-d811d59ad6a7'" class="offer-item__conteiner offer-dark">
+          <div class="offer-item__title">
+            {{ offer.title }}
+          </div>
+          <h2 class="offer-item__description" v-html="_.replace(offer.description, ' ₽', '&nbsp;₽')">
+          </h2>
+          <div class="offer-item__duration">
+            Подписка на {{ moment.duration(offer.duration, offer.duration_unit).humanize() }}
+          </div>
+          <div v-if="offer.first_interval_price" class="offer-item__first-price">
+            Обычная цена <del>{{ (offer.first_interval_price || 0)/100 }}&nbsp;₽</del>
+          </div>
+          <button @click="selectedOfferId=offer.id">{{ offer.button_text || 'Оформить подписку'}}</button>
+          <a class="offer-item_footer-link first" href="#watch">Что посмотреть за выходные?</a>
+        </div>
+
+        <div v-else-if="offer.id == '253fcae2-ab29-40d4-86b4-55fd0b1c56eb'" class="offer-item__conteiner offer-red">
+          <div class="offer-item__title">
+            {{ offer.title }}
+          </div>
+          <h2 class="offer-item__description" v-html="_.replace(offer.description, ' ₽', '&nbsp;₽')">
+          </h2>
+          <div class="offer-item__duration">
+            Подписка на {{ moment.duration(offer.duration, offer.duration_unit).humanize() }}
+          </div>
+          <div v-if="offer.first_interval_price" class="offer-item__first-price">
+            Обычная цена <del>{{ (offer.first_interval_price || 0)/100 }}&nbsp;₽</del>
+          </div>
+          <button @click="selectedOfferId=offer.id">{{ offer.button_text || 'Оформить подписку'}}</button>
+          <a class="offer-item_footer-link center" href="#watch">Что нового стоит посмотреть?</a>
+        </div>
+    
+        <div v-else-if="offer.id == '29ec4ed1-dc08-44fd-9e3f-4fb1bd04e100'" class="offer-item__conteiner offer-dark">
+          <div class="offer-item__title">
+            {{ offer.title }}
+          </div>
+          <h2 class="offer-item__description" v-html="_.replace(offer.description, ' ₽', '&nbsp;₽')">
+          </h2>
+          <div class="offer-item__duration">
+            Подписка на {{ moment.duration(offer.duration, offer.duration_unit).humanize() }}
+          </div>
+          <div v-if="offer.first_interval_price" class="offer-item__first-price">
+            Обычная цена <del>{{ (offer.first_interval_price || 0)/100 }}&nbsp;₽</del>
+          </div>
+          <button @click="selectedOfferId=offer.id">{{ offer.button_text || 'Оформить подписку'}}</button>
+          <a class="offer-item_footer-link third" href="#watch">Посмотреть список самого <br> популярного</a>
+        </div>
+      </div>
+    </div>
+    <div v-else class="auth-layout">
+      <div class="auth-form-popup __opened" data-popup="code">
+        <div @click="selectedOfferId = null" class="auth-form-popup-close"></div>
+        <vue-auth v-if="!currentSession" @session-update="setCurrentSession"></vue-auth>
+        <vue-offers v-else :current-session="currentSession" :selected-offer-id="selectedOfferId"></vue-offers>
+      </div>
+    </div>
+  </div>
+
+  <!-- @NOTE: инициализирую Vue на элемент с id="app" -->
+  <script>
+    /* config */
+    moment.locale('ru');
+    $('.auth-code').mask('0000');
+
+    // регистрирую специальный инстанс аксиоса
+    Vue.mixin({
+      computed: {
+        $axios: () => axios.create({
+          baseURL: 'https://api-production.vipplay.ru/api/',
+        }),
+      }
+    });
+    var $vue = new Vue({
+      el: "#app",
+      data() {
+        return {
+          currentSession: null,
+          selectedOfferId: null,
+          offers: [],
+        };
+      },
+  
+      methods: {
+        setCurrentSession(session) {
+          this.currentSession = session;
+        },
+      },
+
+      async mounted() {
+        var vm = this;
+        try {
+          let { data: offers } = await this.$axios.get('/v1/marketing_offers');
+          debugger
+          this.offers = offers;
+        }
+        catch (err) {
+          console.error(err);
+        }
+      }
+    });
+  </script>
+<!-- /.Код для вставки в тильду -->
+
+</body>
+</html>

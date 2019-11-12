@@ -659,7 +659,6 @@
         var vm = this;
         try {
           let { data: offers } = await this.$axios.get('/v1/marketing_offers');
-          debugger
           this.offers = offers;
         }
         catch (err) {

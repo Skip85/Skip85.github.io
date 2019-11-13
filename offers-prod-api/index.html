@@ -31,6 +31,7 @@
   <link href="assets/style.css" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment-with-locales.min.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bowser/1.9.4/bowser.min.js"></script>
 
   <script src="assets/jquery.mask.min.js"></script>
   <script src="assets/script.js"></script>
@@ -321,14 +322,22 @@
           try {
             this.disabled = true;
             let response = await this.$axios.post(`/v1/sessions?user_parameters[offer_landing]=offer.vipplay.ru`, {
-              ...auth
+              ...auth,
+              device: {
+                uid: '-',
+                os: bowser.osname,
+                app_version: 0,
+                name: `${window.screen.width * window.devicePixelRatio}x${window.screen.height * window.devicePixelRatio}; ${window.navigator.userAgent}`,
+                type: 'web landing',
+              }
             });
 
             this.isSubmitPhone = false;
             this.code = null;
 
             this.session = response.data;
-            Cookies.set('auth', this.session.auth, { expires: 7, path: '/' }); // 7d
+            Cookies.set('auth', this.session.auth, { expires: 7, path: '/' }); // для localhost, githubPage
+            Cookies.set('auth', this.session.auth, { expires: 7, path: '/', domain: 'vipplay.ru' }); // 7d
             this.$axios.defaults.headers.common['Authorization'] = this.session.auth.token;
             this.$emit('session-update', this.session);
           }
@@ -341,9 +350,10 @@
 
         async logout() {
           try {
-            await this.$axios.delete(`/v1/sessions/${this.currentSessionId}`);
+            if (this.currentSessionId) this.$axios.delete(`/v1/sessions/${this.currentSessionId}`);
             this.session = null;
-            Cookies.remove('auth');
+            Cookies.remove('auth', { path: '/'});
+            Cookies.remove('auth', { path: '/', domain: 'vipplay.ru' });
             delete this.$axios.defaults.headers.common['Authorization'];
             this.$emit('session-update', null);
           }
@@ -380,6 +390,9 @@
         }
         catch(err) {
           console.error(err);
+          if (err.response.status == 401) {
+            this.logout();
+          }
         }
       }
     });
@@ -567,6 +580,7 @@
   <div id="app">
     <div v-if="!selectedOfferId" class="actions list-offers">
       <div v-for="(offer, id) in offers" class="offer-item">
+        <!-- id Офферов менять тут offer.id= 'Ваш id оффера' -->
         <div v-if="offer.id == '7a1a0b4a-1f44-4b35-a3a6-d811d59ad6a7'" class="offer-item__conteiner offer-dark">
           <div class="offer-item__title">
             {{ offer.title }}
@@ -583,6 +597,7 @@
           <a class="offer-item_footer-link first" href="#watch">Что посмотреть за выходные?</a>
         </div>
 
+        <!-- id Офферов менять тут offer.id= 'Ваш id оффера' -->
         <div v-else-if="offer.id == '253fcae2-ab29-40d4-86b4-55fd0b1c56eb'" class="offer-item__conteiner offer-red">
           <div class="offer-item__title">
             {{ offer.title }}
@@ -599,6 +614,7 @@
           <a class="offer-item_footer-link center" href="#watch">Что нового стоит посмотреть?</a>
         </div>
     
+        <!-- id Офферов менять тут offer.id= 'Ваш id оффера' -->
         <div v-else-if="offer.id == '29ec4ed1-dc08-44fd-9e3f-4fb1bd04e100'" class="offer-item__conteiner offer-dark">
           <div class="offer-item__title">
             {{ offer.title }}

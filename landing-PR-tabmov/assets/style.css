@@ -1,0 +1,24 @@
+body * {
+}
+
+.header-container {
+  height: 100vh;
+  width: 100vw;
+  background-image: url('./images/tambov_main.jpg');
+}
+
+.header-container .container {
+  margin-top: 40px;
+}
+
+.header-container__filter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-container__filter {
+  height: 100%;
+  width: 100%;
+  backdrop-filter: blur(2px) opacity(0.6);
+}

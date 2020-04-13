@@ -330,7 +330,7 @@
 
           try {
             this.disabled = true;
-            let response = await this.$axios.post('/v2/sessions?', {
+            let response = await this.$axios.post('/v2/sessions', {
               ...auth,
               device: {
                 uid: '-',

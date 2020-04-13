@@ -28,15 +28,22 @@
 
   <link href="https://cdn.jsdelivr.net/npm/intl-tel-input@16.0.1/build/css/intlTelInput.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap" rel="stylesheet">
-  <link href="assets/style.css" rel="stylesheet">
+  <link href="https://static.vipplay.ru/promo-sites/subscribe-form/assets/style.css" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment-with-locales.min.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bowser/1.9.4/bowser.min.js"></script>
 
-  <script src="assets/jquery.mask.min.js"></script>
-  <script src="assets/script.js"></script>
-  <script src="assets/jwt-decode.min.js"></script>
-  <script src="assets/oauth.js"></script>
+  <script src="https://static.vipplay.ru/promo-sites/subscribe-form/assets/jquery.mask.min.js"></script>
+  <script src="https://static.vipplay.ru/promo-sites/subscribe-form/assets/script.js"></script>
+  <script src="https://static.vipplay.ru/promo-sites/subscribe-form/assets/jwt-decode.min.js"></script>
+  <script src="https://static.vipplay.ru/promo-sites/subscribe-form/assets/oauth.js"></script>
+  <script>
+    $(document).ready(function () {
+      $('#rec159821908 a').click(function () {
+        javascript:$('#e6b5f8a2-c4f6-4448-b23e-f7003a8e1d57').click();
+      });
+    });
+  </script>
 
   <!-- @NOTE: объявляю шаблоны компонентов через text/x-template https://ru.vuejs.org/v2/guide/components-edge-cases.html#X-Templates -->
   <script type="text/x-template" id="vue-auth-template">  <!-- компонент авторизации -->
@@ -120,8 +127,8 @@
                 <label>
                   <input v-model="agree" class="auth-form-item-field js-auth-form-item-field" type="checkbox" name="agree">
                   <span class="auth-form-item-label">
-                      Я&nbsp;подтверждаю, что ознакомился и&nbsp;принимаю <a href="" target="_blank">условия политики конфиденциальности</a>
-                      и&nbsp;<a href="" target="_blank">пользовательского соглашения</a>
+                      Я&nbsp;подтверждаю, что ознакомился и&nbsp;принимаю <a href="https://vipplay.ru/privacy-policy/" target="_blank">условия политики конфиденциальности</a>
+                      и&nbsp;<a href="https://vipplay.ru/user-agreement/" target="_blank">пользовательского соглашения</a>
                       <span class="auth-form-item__error-inline">Это обязательное поле</span>
                   </span>
                 </label>
@@ -511,13 +518,13 @@
 
       computed: {
         price() {
-          return _.get(this.selectedOffer, 'price')/100;
+          return (_.get(this.selectedOffer, 'first_interval_price') || _.get(this.selectedOffer, 'price'))/100;
         },
         discount() {
           return _.get(this.promocodeApp, 'promo.discount');
         },
         totalPrice() {
-          return _.round(_.get(this.selectedOffer, 'price_with_discount', 0)/100 || this.price * ((100 - (_.get(this.promocodeApp, 'promo.discount') || 0))/100), 2);
+          return _.round((this.price * ((100 - (_.get(this.promocodeApp, 'promo.discount') || 0))/100)) || _.get(this.selectedOffer, 'price_with_discount', 0)/100, 2);
         },
         subscriptionTerm() {
           return moment.duration(_.get(this.selectedOffer, 'duration'), _.get(this.selectedOffer, 'duration_unit')).humanize();
@@ -544,6 +551,7 @@
         },
         async getPaymentUrl() {
           const location = window.location;
+          const hasSlash = _.endsWith(location.pathname, '/')
           try {
             this.disabledPayLink = true;
             let { data: { url }} = await this.$axios.post('/v2/payment_methods', null, {
@@ -552,7 +560,7 @@
                 promo_code_application_id: _.get(this.promocodeApp, 'id'),
                 '3ds':'3ds',
                 template: 'Offer',
-                return_url: `${location.origin}${location.pathname}/payment/{success}`,
+                return_url: `${location.origin}${location.pathname}${!hasSlash && '/'}payment/{success}`,
                 'additional_params[Cardholder]': this.cardHolder,
                 'additional_params[Hreflocation]': location.href,
               }

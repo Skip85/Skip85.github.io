@@ -220,6 +220,9 @@
       },
   
       methods: {
+        getQueryParameters : function(str) {
+          return (str || document.location.search).replace(/(^\?)/,'').split("&").map(function(n){return n = n.split("="),this[n[0]] = n[1],this}.bind({}))[0];
+        },
         convertedPlaceholder() {
           let phoneEl = document.querySelector('[name="phone"]');
           if (!phoneEl) {
@@ -280,9 +283,6 @@
                 'Authorization': `APIAuth ${platformLogin}:${platformToken}`,
               },
             });
-            /* await this.$axios.post(`/v1/auth_codes`, {
-              msisdn: this.convertedPhone,
-            }); */
           }
           catch(err) {
             console.error(err);
@@ -304,6 +304,15 @@
         },
         
         async auth(provider, popupCode, redirectUri) {
+          const location = window.location;
+
+          const queryParams = this.getQueryParameters();
+          const utms = _.mapKeys(_.pickBy(queryParams, (val, key) => {
+            return _.startsWith(key, 'utm_');
+          }), (val, key) => {
+            return `user_parameters[${key}]`;
+          });
+ 
           var auth = {};
           if (popupCode) {
             auth = {
@@ -321,7 +330,7 @@
 
           try {
             this.disabled = true;
-            let response = await this.$axios.post(`/v1/sessions?user_parameters[offer_landing]=offer.vipplay.ru`, {
+            let response = await this.$axios.post('/v2/sessions?', {
               ...auth,
               device: {
                 uid: '-',
@@ -329,6 +338,11 @@
                 app_version: 0,
                 name: `${window.screen.width * window.devicePixelRatio}x${window.screen.height * window.devicePixelRatio}; ${window.navigator.userAgent}`,
                 type: 'web landing',
+              }
+            }, {
+              params: {
+                'user_parameters[offer_landing]': location.hostname,
+                ...utms,
               }
             });
 
@@ -529,6 +543,7 @@
           }
         },
         async getPaymentUrl() {
+          const location = window.location;
           try {
             this.disabledPayLink = true;
             let { data: { url }} = await this.$axios.post('/v2/payment_methods', null, {
@@ -537,8 +552,9 @@
                 promo_code_application_id: _.get(this.promocodeApp, 'id'),
                 '3ds':'3ds',
                 template: 'Offer',
-                return_url: 'https://offer.vipplay.ru/payment/{success}',
+                return_url: `${location.origin}${location.pathname}/payment/{success}`,
                 'additional_params[Cardholder]': this.cardHolder,
+                'additional_params[Hreflocation]': location.href,
               }
             });
             this.urlPayment = url;

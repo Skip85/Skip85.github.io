@@ -1,0 +1,253 @@
+<html>
+  <head>
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@600;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  </head>
+
+  <body>
+    <div id="app">
+      <div class="header">
+        <div class="container">
+          <img class="icon" src="img/icon.svg" alt="">
+          <h1 class="title">Как быстро <br> выбрать кино?</h1>
+          <p class="description">Что посмотреть, когда ищешь новое или не можешь <br> вспомнить тот самый фильм</p>
+        </div>
+      </div>
+  
+      <div class="information">
+        <div class="container">
+          <h3>Хотите разгрузить голову, найти<br>
+            правильный хоррор, чтобы прижаться<br>
+            подближе друг к другу на свидании?
+          </h3>
+  
+          <div class="information-actions">
+            <span class="information-actions__item">Изучать историю</span>
+            <span class="information-actions__item">Вдохновиться классикой</span>
+            <span class="information-actions__item">Скоротать время</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="moments-container">
+        <div class="container">
+          <h2>Выбирайте <br> через моменты</h2>
+          <p class="moments-container__description">Колдовство, классика жанра, российские премьеры — мы собрали <br>
+            все для того, чтобы вы быстрее нашли правильное кино
+          </p>
+
+          <div class="slider">
+            <div v-if="selectedMoment" class="choosen-moment">
+              <div class="choosen-moment__actions">
+                <div class="button button-outline">
+                  Сцены с поцелуями
+                </div>
+                <div class="button button-outline">
+                  Сцены с поцелуями
+                </div>
+                <div class="button button-outline">
+                  Сцены с поцелуями
+                </div>
+                <div class="button button-outline">
+                  Сцены с поцелуями
+                </div>
+                <div @click="isOpenedMenu = true" class="button button-red">
+                  Показать все +
+                </div>
+              </div>
+              <div class="choosen-moment__item--container">
+                <div
+                  v-for="choosen in choosenMoments"
+                  :key="choosen.id"
+                  class="choosen-moment__item"
+                  >
+                  <img src="img/slider-item.png" alt="">
+
+                  <div class="slider-item-banner__contaier">
+                    <div class="slider-item-banner">
+                      <div class="item-banner__image-container">
+                        <img src="img/banner.png" alt="" class="banner">
+                      </div>
+                      <div class="item-banner__info">
+                        <h3 class="banner-title">
+                          {{ [selectedMoment.name, selectedMoment.year].join(', ') }}
+                        </h3>
+                        <div class="banner-description">{{ selectedMoment.description }}</div>
+                        <div class="banner-actions">
+                          <div class="button button-outline-red">Перейти к просмотру</div>
+                          <div class="button button-red">Вернуться к моментам</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <template v-else>
+              <div
+                v-for="(moment, idx) in moments"
+                :key="idx"
+                @click="selectedMoment = moment"
+                class="item slider-item"
+                >
+              </div>
+            </template>  
+            
+          </div>
+
+          <h2>Почему так проще <br> выбрать кино</h2>
+
+          <div class="about">
+            <div class="about-item">
+              <img class="eyes" src="img/eyes.png" alt="">
+              <p class="about-item__title">Опирайтесь на свои эмоции</p>
+              <div class="about-item__description">
+                Часто рейтинги и чужие мнения не дают представления о фильме, а наоборот искажают ожидания.
+                Поэтому доверяйте только своему мнению, выбрайте кино по ярким моментам фильма, опираясь на эмоциями
+              </div>
+            </div>
+
+            <div class="about-item">
+              <img class="lightning" src="img/lightning.png" alt="">
+              <p class="about-item__title">Опирайтесь на свои эмоции</p>
+              <div class="about-item__description">
+                Часто рейтинги и чужие мнения не дают представления о фильме, а наоборот искажают ожидания.
+                Поэтому доверяйте только своему мнению, выбрайте кино по ярким моментам фильма, опираясь на эмоциями
+              </div>
+            </div>
+
+            <div class="about-item">
+              <img class="heart" src="img/heart.png" alt="">
+              <p class="about-item__title">Опирайтесь на свои эмоции</p>
+              <div class="about-item__description">
+                Часто рейтинги и чужие мнения не дают представления о фильме, а наоборот искажают ожидания.
+                Поэтому доверяйте только своему мнению, выбрайте кино по ярким моментам фильма, опираясь на эмоциями
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bottom">
+        <div class="container">
+          <h2>Выбирайте кино <br> прямо сейчас</h2>
+          <p class="bottom-description">Вспоминайте любимое и открывайте новое — <br> подберите кино для настроения</p>
+          <div class="button-container">
+            <div class="button button-outline-light">Попробовать</div>
+          </div>
+          <div class="socials">Поделиться: инстаграме, фейсбуке, вконтакте</div>
+        </div>
+      </div>
+
+      <div v-if="isOpenedMenu" class="menu-container">
+        <div class="menu-close">
+          <div @click="isOpenedMenu = false" class="close-icon"></div>  
+        </div>
+        <div class="menu-list">
+          <div
+            v-for="item in menuList"
+            :key="item.id"
+            class="menu-item"
+            >
+            <div class="menu-item__moment">{{ item.name }}</div>
+            <div class="menu-item__films">
+              <div
+                v-for="film in item.films"
+                :key="film.id"
+                class="films-item"
+                >
+                <h2>{{ film.name }}</h2>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // регистрирую специальный инстанс аксиоса
+      Vue.mixin({
+        computed: {
+          $axios: () => axios.create({
+            baseURL: 'https://bo-staging.viasat.su/api/',
+          }),
+        }
+      });
+
+      var $vue = new Vue({
+        el: "#app",
+        data() {
+          return {
+            moments: [{
+              id: 1,
+              name: 'Амели',
+              year: '2001',
+              description: 'Вы можете продолжить смотреть этот фильм на Vip Play'
+            }],
+            choosenMoments: [{
+              id: 1,
+              name: 'Какой-то выбранный момент',
+            }],
+            selectedMoment: null,
+
+            isOpenedMenu: false,
+            menuList: [
+              {
+                id: 1,
+                name: 'Сцены с поцелуями',
+                films: [
+                  {
+                    id: 1,
+                    name: 'Амели',
+                    year: '2001',
+                    description: 'Вы можете продолжить смотреть этот фильм на Vip Play',
+                  },
+                  {
+                    id: 2,
+                    name: 'Колдуй с Гарри Поттером',
+                    year: '2001',
+                    description: 'Вы можете продолжить смотреть этот фильм на Vip Play',
+                  },
+                  {
+                    id: 3,
+                    name: 'Сцены с драками',
+                    year: '2001',
+                    description: 'Вы можете продолжить смотреть этот фильм на Vip Play',
+                  },
+                ],
+              },
+              {
+                id: 2,
+                name: 'Сцены с поцелуями',
+                films: [
+                  {
+                    id: 1,
+                    name: 'Амели',
+                    year: '2001',
+                    description: 'Вы можете продолжить смотреть этот фильм на Vip Play',
+                  },
+                ],
+              },
+              {
+                id: 3,
+                name: 'Сцены с поцелуями',
+                films: [
+                  {
+                    id: 1,
+                    name: 'Амели',
+                    year: '2001',
+                    description: 'Вы можете продолжить смотреть этот фильм на Vip Play',
+                  },
+                ],
+              },
+            ],
+          };
+        },
+      });
+    </script>
+    
+  </body>
+</html>

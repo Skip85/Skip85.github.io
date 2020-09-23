@@ -35,6 +35,7 @@
 
         props: {
           slide: { type: Object, required: true },
+          moments: { type: Array, default: () => ([]) },
         },
 
         data() {
@@ -43,6 +44,7 @@
             isSliderIntersect: false,
             player: null,
             timeIsOver: false,
+            selectedPlaylist: _.head(this.moments),
           };
         },
 
@@ -64,25 +66,34 @@
 
         mounted() {
           const vm = this;
-
           var playerElement = document.getElementById(this.targetId);
 
           vm.player = new Clappr.Player({
-            source: this.slide.content.playlist_url,
-            poster: this.slide.content.poster.image_url,
+            source: this.selectedPlaylist.content.playlist_url,
+            poster: this.selectedPlaylist.content.poster.image_url,
             mute: true,
             width: '100%',
             chromeless: true,
             events: {
               onReady() {
-                if (vm.slide.start_offset) {
-                  this.seek(vm.slide.start_offset);
+                if (vm.selectedPlaylist.start_offset) {
+                  this.seek(vm.selectedPlaylist.start_offset);
                 }
               },
               onTimeUpdate(statusObject) {
-                if (statusObject.current >= vm.slide.end_offset) {
-                  vm.player.stop();
-                  vm.timeIsOver = true;
+                if (statusObject.current >= vm.selectedPlaylist.end_offset) {
+                  const nextMoment = vm.moments[_.findIndex(vm.moments, { id: vm.selectedPlaylist.id }) + 1];
+                  if (nextMoment) {
+                    vm.selectedPlaylist = nextMoment;
+                    vm.player.configure({
+                      source: vm.selectedPlaylist.content.playlist_url,
+                    });
+                    vm.player.play();
+                  }
+                  else {
+                    vm.player.stop();
+                    vm.timeIsOver = true;
+                  }
                 }
               }
             }
@@ -216,6 +227,7 @@
     
                       <vue-slide
                         :slide="slide"
+                        :moments="collections[0].moments"
                         />
                     </div>
                   </div>
@@ -383,6 +395,7 @@
           const vm = this;
           try {
             const { data: collections } = await this.$axios.get('/v1/moment_collections?include=moments');
+            //this.collections = _.map(collections, o => { return _.head(o.moments) });
             this.collections = collections;
             this.selectedMoment = this.collections[0];
           }

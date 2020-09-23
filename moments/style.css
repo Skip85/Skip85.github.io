@@ -382,6 +382,66 @@ p {
 /* </ MENU > */
 
 
+/* < SLIDER > */
+
+  .swiper-container {
+    max-height: 320px;
+    background-color: #030001;
+  }
+
+  .swiper-slide.slider-item {
+    position: relative;
+    height: 320px;
+    width: 560px;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .swiper-slide-pseudo {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    background: linear-gradient(0deg, rgba(0, 0, 0, .5) 0%, rgba(0, 0, 0, .2) 40%);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px;
+  }
+
+  .swiper-slide-pseudo:hover {
+    cursor: pointer;
+    background-color: #E20338;
+    opacity: .5;
+  }
+
+  .slider-item--more-content {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .slider-item--more-content img {
+    width: 24px;
+    height: 24px;
+    z-index: 3;
+  }
+  
+  .slider-item--info .moment-name {
+    opacity: .7;
+    font-size: 12px;
+  }
+
+  .slider-item--info .content-name {
+    margin-top: 8px;
+    font-size: 22px;
+    font-weight: 600;
+  }
+
+/* </ SLIDER > */
+
+
 /* < MEDIA > */
 
 @media (max-width: 768px) {

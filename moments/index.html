@@ -1,12 +1,118 @@
 <html>
   <head>
     <meta content="width=device-width, initial-scale=1" name="viewport" />
-    <link rel="stylesheet" href="style.css">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex">
+
+
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.11/lodash.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+    <script src="https://unpkg.com/async-oauth-popup@1.0.3/dist/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.7.0/qs.min.js"></script>
+
+    <link href="style.css" rel="stylesheet">
+
     <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@600;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clappr/0.4.0/clappr.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/5.4.5/css/swiper.min.css">
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
   </head>
 
   <body>
+    <script type="text/x-template" id="vue-slide-template">
+      <div :id="targetId" style="background: red;"></div>
+    </script>
+
+    <script>
+      Vue.component('vue-slide', {
+        template: '#vue-slide-template',
+
+        props: {
+          slide: { type: Object, required: true },
+        },
+
+        data() {
+          return {
+            targetId: `slide-${this.slide.id}`,
+            isSliderIntersect: false,
+            player: null,
+            timeIsOver: false,
+          };
+        },
+
+        watch: {
+          slide: {
+            deep: true,
+            handler(value) {
+              if (this.timeIsOver) return;
+
+              if (value['$isIntersecting']) {
+                this.player.play();
+              }
+              else {
+                this.player.pause();
+              }
+            }
+          }
+        },
+
+        mounted() {
+          const vm = this;
+
+          var playerElement = document.getElementById(this.targetId);
+
+          vm.player = new Clappr.Player({
+            source: this.slide.content.playlist_url,
+            poster: this.slide.content.poster.image_url,
+            mute: true,
+            width: '100%',
+            chromeless: true,
+            events: {
+              onReady() {
+                if (vm.slide.start_offset) {
+                  this.seek(vm.slide.start_offset);
+                }
+              },
+              onTimeUpdate(statusObject) {
+                if (statusObject.current >= vm.slide.end_offset) {
+                  vm.player.stop();
+                  vm.timeIsOver = true;
+                }
+              }
+            }
+          });
+
+          vm.player.attachTo(playerElement);
+
+          // this.$nextTick(() => {
+          //   var options = {
+          //     threshold: 0.5
+          //   };
+
+          //   var target = document.querySelector(`#${this.targetId}`);
+
+
+          //   if (!target) return;
+
+          //   var callback = function(entries, observer) {
+          //     entries.forEach(entry => {
+          //       vm.isSliderIntersect = entry.isIntersecting;
+          //     });
+          //   };
+
+          //   var observer = new IntersectionObserver(callback, options);
+          //   observer.observe(target);
+          // });
+        },
+      })
+    </script>
+
     <div id="app">
       <div class="header">
         <div class="container">
@@ -39,7 +145,7 @@
           </p>
 
           <div class="slider">
-            <div v-if="selectedMoment" class="choosen-moment">
+            <div v-if="false" class="choosen-moment">
               <div class="choosen-moment__actions">
                 <div class="button button-outline">
                   Сцены с поцелуями
@@ -63,36 +169,58 @@
                   :key="choosen.id"
                   class="choosen-moment__item"
                   >
-                  <img src="img/slider-item.png" alt="">
-
-                  <div class="slider-item-banner__contaier">
-                    <div class="slider-item-banner">
-                      <div class="item-banner__image-container">
-                        <img src="img/banner.png" alt="" class="banner">
-                      </div>
-                      <div class="item-banner__info">
-                        <h3 class="banner-title">
-                          {{ [selectedMoment.name, selectedMoment.year].join(', ') }}
-                        </h3>
-                        <div class="banner-description">{{ selectedMoment.description }}</div>
-                        <div class="banner-actions">
-                          <div class="button button-outline-red">Перейти к просмотру</div>
-                          <div class="button button-red">Вернуться к моментам</div>
+                  <template>
+                    <img src="img/slider-item.png" alt="">
+                    <div class="slider-item-banner__contaier">
+                      <div class="slider-item-banner">
+                        <div class="item-banner__image-container">
+                          <img src="img/banner.png" alt="" class="banner">
+                        </div>
+                        <div class="item-banner__info">
+                          <h3 class="banner-title">
+                            {{ [selectedMoment.name, selectedMoment.year].join(', ') }}
+                          </h3>
+                          <div class="banner-description">{{ selectedMoment.description }}</div>
+                          <div class="banner-actions">
+                            <div class="button button-outline-red">Перейти к просмотру</div>
+                            <div class="button button-red">Вернуться к моментам</div>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </template>
                 </div>
               </div>
             </div>
 
             <template v-else>
-              <div
+              <!-- <div
                 v-for="(moment, idx) in moments"
                 :key="idx"
                 @click="selectedMoment = moment"
                 class="item slider-item"
-                >
+                > -->
+                <div v-if="selectedMoment" class="swiper-container">
+                  <div class="swiper-wrapper">
+                    <div v-for="slide in selectedMoment.moments" :key="slide.id" class="swiper-slide slider-item">
+                      <div class="swiper-slide-pseudo">
+                        <div class="slider-item--more-content">
+                          <img src="img/more-content.png" alt="">
+                        </div>
+    
+                        <div class="slider-item--info">
+                          <span class="moment-name">{{ slide.title }}</span>
+                          <p class="content-name">{{ slide.content.title }}</p>
+                        </div>
+                      </div>
+    
+                      <vue-slide
+                        :slide="slide"
+                        />
+                    </div>
+                  </div>
+                  <div class="swiper-scrollbar"></div>
+                </div>
               </div>
             </template>  
             
@@ -172,7 +300,7 @@
       Vue.mixin({
         computed: {
           $axios: () => axios.create({
-            baseURL: 'https://bo-staging.viasat.su/api/',
+            baseURL: 'https://api-staging.viasat.su/api',
           }),
         }
       });
@@ -244,10 +372,54 @@
                 ],
               },
             ],
+            isSliderIntersect: false,
+            player: null,
+            selectedMoment: null,
+            collections: [],
           };
         },
+
+        async mounted() {
+          const vm = this;
+          try {
+            const { data: collections } = await this.$axios.get('/v1/moment_collections?include=moments');
+            this.collections = collections;
+            this.selectedMoment = this.collections[0];
+          }
+          catch (err) {
+            console.error(err);
+          }
+
+          this.$nextTick(() => {
+            const swiper = new Swiper('.swiper-container', {
+              slidesPerView: 2,
+              spaceBetween: 30,
+              slidesOffsetAfter: 20,
+              pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+              },
+            });
+
+            const callback = function(entries, observer) {
+              entries.forEach(entry => {
+                const idx = _.findIndex(vm.selectedMoment.moments, { id: _.replace(entry.target.id, 'slide-', '') });
+                vm.$set(vm.selectedMoment.moments[idx], '$isIntersecting', entry.isIntersecting);
+              });
+            };
+
+            const observer = new IntersectionObserver(callback, options);
+            for ( let i = 0; i < this.selectedMoment.moments.length; i++) {
+              var options = {
+                rootMargin: '0px',
+                threshold: 1.0,
+                id: vm.selectedMoment.moments[i].id,
+              };
+              observer.observe(document.querySelector(`#slide-${vm.selectedMoment.moments[i].id}`));
+            }
+          });
+        }
       });
-    </script>
-    
+    </script>    
   </body>
 </html>

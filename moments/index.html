@@ -26,7 +26,10 @@
 
   <body>
     <script type="text/x-template" id="vue-slide-template">
-      <div :id="targetId" style="background: red;"></div>
+      <div>
+        <div :id="targetId" style="background: red;"></div>
+        <slot name="pseudo" :selected="selectedPlaylist"></slot>
+      </div>
     </script>
 
     <script>
@@ -100,26 +103,6 @@
           });
 
           vm.player.attachTo(playerElement);
-
-          // this.$nextTick(() => {
-          //   var options = {
-          //     threshold: 0.5
-          //   };
-
-          //   var target = document.querySelector(`#${this.targetId}`);
-
-
-          //   if (!target) return;
-
-          //   var callback = function(entries, observer) {
-          //     entries.forEach(entry => {
-          //       vm.isSliderIntersect = entry.isIntersecting;
-          //     });
-          //   };
-
-          //   var observer = new IntersectionObserver(callback, options);
-          //   observer.observe(target);
-          // });
         },
       })
     </script>
@@ -211,24 +194,26 @@
                 @click="selectedMoment = moment"
                 class="item slider-item"
                 > -->
-                <div v-if="selectedMoment" class="swiper-container">
+                <div v-if="_.size(collections)" class="swiper-container">
                   <div class="swiper-wrapper">
-                    <div v-for="slide in selectedMoment.moments" :key="slide.id" class="swiper-slide slider-item">
-                      <div class="swiper-slide-pseudo">
-                        <div class="slider-item--more-content">
-                          <img src="img/more-content.png" alt="">
-                        </div>
-    
-                        <div class="slider-item--info">
-                          <span class="moment-name">{{ slide.title }}</span>
-                          <p class="content-name">{{ slide.content.title }}</p>
-                        </div>
-                      </div>
-    
+                    <div v-for="slide in collections" :key="slide.id" class="swiper-slide slider-item">
                       <vue-slide
                         :slide="slide"
-                        :moments="collections[0].moments"
-                        />
+                        :moments="slide.moments"
+                        >
+                        <template v-slot:pseudo="{ selected }">
+                          <div class="swiper-slide-pseudo">
+                            <div class="slider-item--more-content">
+                              <img src="img/more-content.png" alt="">
+                            </div>
+        
+                            <div class="slider-item--info">
+                              <span class="moment-name">{{ slide.title }}</span>
+                              <p class="content-name">{{ selected.title }}</p>
+                            </div>
+                          </div>
+                        </template>
+                      </vue-slide>
                     </div>
                   </div>
                   <div class="swiper-scrollbar"></div>
@@ -331,8 +316,6 @@
               id: 1,
               name: 'Какой-то выбранный момент',
             }],
-            selectedMoment: null,
-
             isOpenedMenu: false,
             menuList: [
               {
@@ -416,19 +399,19 @@
 
             const callback = function(entries, observer) {
               entries.forEach(entry => {
-                const idx = _.findIndex(vm.selectedMoment.moments, { id: _.replace(entry.target.id, 'slide-', '') });
-                vm.$set(vm.selectedMoment.moments[idx], '$isIntersecting', entry.isIntersecting);
+                const idx = _.findIndex(vm.collections, { id: _.replace(entry.target.id, 'slide-', '') });
+                vm.$set(vm.collections[idx], '$isIntersecting', entry.isIntersecting);
               });
             };
 
             const observer = new IntersectionObserver(callback, options);
-            for ( let i = 0; i < this.selectedMoment.moments.length; i++) {
+            for ( let i = 0; i < this.collections.length; i++) {
               var options = {
                 rootMargin: '0px',
                 threshold: 1.0,
-                id: vm.selectedMoment.moments[i].id,
+                id: vm.collections[i].id,
               };
-              observer.observe(document.querySelector(`#slide-${vm.selectedMoment.moments[i].id}`));
+              observer.observe(document.querySelector(`#slide-${vm.collections[i].id}`));
             }
           });
         }

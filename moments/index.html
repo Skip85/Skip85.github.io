@@ -27,7 +27,7 @@
   <body>
     <script type="text/x-template" id="vue-slide-template">
       <div>
-        <div :id="targetId" style="background: red;"></div>
+        <div class="player-container" :id="targetId" style="background: red;"></div>
         <slot name="pseudo" :selected="selectedPlaylist"></slot>
       </div>
     </script>
@@ -39,15 +39,18 @@
         props: {
           slide: { type: Object, required: true },
           moments: { type: Array, default: () => ([]) },
+          useIntersect: { type: Boolean, default: true },
+          chosenId: { type: String, default: '' },
+          isOpenedMoreInfo: { type: Boolean, default: false },
+          selectedPlaylist: { type: Object, default: () => ({}) },
         },
 
         data() {
           return {
-            targetId: `slide-${this.slide.id}`,
+            targetId: `slide-${this.slide.id}${this.chosenId}`,
             isSliderIntersect: false,
             player: null,
             timeIsOver: false,
-            selectedPlaylist: _.head(this.moments),
           };
         },
 
@@ -55,7 +58,7 @@
           slide: {
             deep: true,
             handler(value) {
-              if (this.timeIsOver) return;
+              if (this.timeIsOver || !this.useIntersect) return;
 
               if (value['$isIntersecting']) {
                 this.player.play();
@@ -64,7 +67,29 @@
                 this.player.pause();
               }
             }
-          }
+          },
+
+          isOpenedMoreInfo(value) {
+            if (value) {
+              this.player.pause();
+            }
+            else {
+              this.player.play();
+            }
+          },
+
+          selectedPlaylist: {
+            deep: true,
+            handler(val) {
+              if (!val) return;
+
+              this.player.source = this.selectedPlaylist.content.playlist_url;
+              this.player.poster = this.selectedPlaylist.content.poster.image_url;
+              this.player.seek(this.selectedPlaylist.start_offset);
+              //this.player.options.events.onTimeUpdate({ current: this.selectedPlaylist.start_offset });
+              this.player.play();
+            },
+          },
         },
 
         mounted() {
@@ -76,6 +101,7 @@
             poster: this.selectedPlaylist.content.poster.image_url,
             mute: true,
             width: '100%',
+            height: '100%',
             chromeless: true,
             events: {
               onReady() {
@@ -87,7 +113,7 @@
                 if (statusObject.current >= vm.selectedPlaylist.end_offset) {
                   const nextMoment = vm.moments[_.findIndex(vm.moments, { id: vm.selectedPlaylist.id }) + 1];
                   if (nextMoment) {
-                    vm.selectedPlaylist = nextMoment;
+                    vm.$emit('update:selectedPlaylist', nextMoment);
                     vm.player.configure({
                       source: vm.selectedPlaylist.content.playlist_url,
                     });
@@ -103,7 +129,18 @@
           });
 
           vm.player.attachTo(playerElement);
+
+          if (!this.useIntersect) {
+            vm.player.play();
+          }
         },
+
+        async beforeDestroy() {
+          if (this.player) {
+            await this.player.destroy();
+            this.player = null;
+          }
+        }
       })
     </script>
 
@@ -139,7 +176,7 @@
           </p>
 
           <div class="slider">
-            <div v-if="false" class="choosen-moment">
+            <div v-if="selectedMoment" class="choosen-moment">
               <div class="choosen-moment__actions">
                 <div class="button button-outline">
                   Сцены с поцелуями
@@ -158,66 +195,88 @@
                 </div>
               </div>
               <div class="choosen-moment__item--container">
-                <div
-                  v-for="choosen in choosenMoments"
-                  :key="choosen.id"
-                  class="choosen-moment__item"
+                <vue-slide
+                  :chosen-id="selectedMoment.id"
+                  class="chosen-moment"
+                  :moments="selectedMoment.moments"
+                  :slide="selectedMoment"
+                  :use-intersect="false"
+                  :is-opened-more-info="isOpenedMoreInfo"
+                  :selected-playlist.sync="selectedPlaylist"
                   >
-                  <template>
-                    <img src="img/slider-item.png" alt="">
-                    <div class="slider-item-banner__contaier">
+                  <template v-slot:pseudo="{ selected }">
+                    <div v-if="isOpenedMoreInfo" class="slider-item-banner__contaier">
                       <div class="slider-item-banner">
                         <div class="item-banner__image-container">
-                          <img src="img/banner.png" alt="" class="banner">
+                          <img :src="selected.content.poster.image_url" alt="" class="banner">
                         </div>
                         <div class="item-banner__info">
                           <h3 class="banner-title">
-                            {{ [selectedMoment.name, selectedMoment.year].join(', ') }}
+                            {{ selected.content.title }}
                           </h3>
-                          <div class="banner-description">{{ selectedMoment.description }}</div>
+                          <div class="banner-description">
+                            Вы можете продолжить смотреть этот фильм на Vip Play
+                          </div>
                           <div class="banner-actions">
                             <div class="button button-outline-red">Перейти к просмотру</div>
-                            <div class="button button-red">Вернуться к моментам</div>
+                            <div @click="isOpenedMoreInfo = false" class="button button-red">Вернуться к моментам</div>
                           </div>
                         </div>
                       </div>
                     </div>
+
+                    <div v-else class="chosen-more-info">
+                      <div class="chosen-moment__title">
+                        {{ selected.title }}
+                      </div>
+
+                      <div class="chosen-moment__emoji">
+                        <div
+                          class="emoji-item"
+                          :class="{ 'emoji-item__selected': emojiItem.id === selected.id }"
+                          v-for="(emojiItem, idxE) in selectedMoment.moments"
+                          :key="idxE"
+                          >
+                          <div @click="selectedPlaylist = emojiItem" class="emoji">
+                            {{ emojiItem.emoji }}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="chosen-moment__continue">
+                        <div @click="isOpenedMoreInfo = true" class="button">Продолжить</div>
+                      </div>
+                    </div>
                   </template>
-                </div>
+                </vue-slide>
               </div>
             </div>
 
             <template v-else>
-              <!-- <div
-                v-for="(moment, idx) in moments"
-                :key="idx"
-                @click="selectedMoment = moment"
-                class="item slider-item"
-                > -->
-                <div v-if="_.size(collections)" class="swiper-container">
-                  <div class="swiper-wrapper">
-                    <div v-for="slide in collections" :key="slide.id" class="swiper-slide slider-item">
-                      <vue-slide
-                        :slide="slide"
-                        :moments="slide.moments"
-                        >
-                        <template v-slot:pseudo="{ selected }">
-                          <div class="swiper-slide-pseudo">
-                            <div class="slider-item--more-content">
-                              <img src="img/more-content.png" alt="">
-                            </div>
-        
-                            <div class="slider-item--info">
-                              <span class="moment-name">{{ slide.title }}</span>
-                              <p class="content-name">{{ selected.title }}</p>
-                            </div>
+              <div v-if="_.size(collections)" class="swiper-container">
+                <div class="swiper-wrapper">
+                  <div v-for="slide in collections" :key="slide.id" class="swiper-slide slider-item">
+                    <vue-slide
+                      :slide="slide"
+                      :moments="slide.moments"
+                      :selected-playlist.sync="selectedPlaylist"
+                      >
+                      <template v-slot:pseudo="{ selected }">
+                        <div class="swiper-slide-pseudo" @click="selectedMoment = slide">
+                          <div class="slider-item--more-content">
+                            <img src="img/more-content.png" alt="">
                           </div>
-                        </template>
-                      </vue-slide>
-                    </div>
+      
+                          <div class="slider-item--info">
+                            <span class="moment-name">{{ slide.title }}</span>
+                            <p class="content-name">{{ selected.title }}</p>
+                          </div>
+                        </div>
+                      </template>
+                    </vue-slide>
                   </div>
-                  <div class="swiper-scrollbar"></div>
                 </div>
+                <div class="swiper-scrollbar"></div>
               </div>
             </template>  
             
@@ -369,18 +428,29 @@
             ],
             isSliderIntersect: false,
             player: null,
-            selectedMoment: null,
+            selectedMoment: null, // Конкретный момент (содержит коллекцию фильмов)
             collections: [],
+            isOpenedMoreInfo: false,
+            selectedPlaylist: null, // Конктерный фильм
           };
+        },
+
+        watch: {
+          selectedMoment: {
+            handler(val) {
+              if (!val) return;
+              this.selectedPlaylist = _.head(val.moments);
+            },
+            deep: true,
+          },
         },
 
         async mounted() {
           const vm = this;
           try {
             const { data: collections } = await this.$axios.get('/v1/moment_collections?include=moments');
-            //this.collections = _.map(collections, o => { return _.head(o.moments) });
             this.collections = collections;
-            this.selectedMoment = this.collections[0];
+            this.selectedPlaylist = _.head(_.head(this.collections).moments);
           }
           catch (err) {
             console.error(err);

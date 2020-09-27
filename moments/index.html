@@ -177,20 +177,11 @@
 
           <div class="slider">
             <div v-if="selectedMoment" class="choosen-moment">
-              <div class="choosen-moment__actions">
-                <div class="button button-outline">
-                  Сцены с поцелуями
+              <div v-for="moment in _.take(collections, 4)" class="choosen-moment__actions" :key="moment.id" >
+                <div class="button" :style="{ 'background-color': moment.color}">
+                  {{ moment.title }}
                 </div>
-                <div class="button button-outline">
-                  Сцены с поцелуями
-                </div>
-                <div class="button button-outline">
-                  Сцены с поцелуями
-                </div>
-                <div class="button button-outline">
-                  Сцены с поцелуями
-                </div>
-                <div @click="isOpenedMenu = true" class="button button-red">
+                <div v-if="_.size(collections) > 4" @click="isOpenedMenu = true" class="button button-red">
                   Показать все +
                 </div>
               </div>
@@ -244,7 +235,7 @@
                       </div>
 
                       <div class="chosen-moment__continue">
-                        <div @click="isOpenedMoreInfo = true" class="button">Продолжить</div>
+                        <div @click="isOpenedMoreInfo = true" class="button button-outline">Продолжить</div>
                       </div>
                     </div>
                   </template>
@@ -464,6 +455,19 @@
               pagination: {
                 el: '.swiper-pagination',
                 clickable: true,
+              },
+              breakpoints: {
+                0: {
+                  slidesPerView: 1,
+                  spaceBetween: 10,
+                },
+                400: {
+                  slidesPerView: 1,
+                  spaceBetween: 10,
+                },
+                768: {
+                  slidesPerView: 2,
+                },
               },
             });
 

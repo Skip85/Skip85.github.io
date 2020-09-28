@@ -200,6 +200,10 @@ p {
   color: #A5A4AA;
 }
 
+.actions-container {
+  display: flex;
+}
+
 .choosen-moment__actions .button {
   margin: 8px;
 }
@@ -222,6 +226,32 @@ p {
   flex: 1;
 }
 
+.choosen-moment__item--container {
+  margin-top: 15px;
+  position: relative;
+}
+
+.pagination-moments {
+  position: absolute;
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  top: 0;
+  bottom: 0;
+  align-items: center;
+}
+
+.pagination-left, .pagination-right {
+  padding: 30px;
+  cursor: pointer;
+}
+
+.pagination-left {
+  transform: rotate(180deg);
+  
+}
+.pagination-right {
+}
 
 /* < BANNER > */
 
@@ -247,6 +277,7 @@ p {
   align-items: center;
   justify-content: center;
   background-color: rgba(0, 0, 0, .8);
+  z-index: 88;
 }
 
 .slider-item-banner {

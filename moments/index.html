@@ -28,7 +28,7 @@
     <script type="text/x-template" id="vue-slide-template">
       <div>
         <div class="player-container" :id="targetId" style="background: red;"></div>
-        <slot name="pseudo" :selected="selectedPlaylist"></slot>
+        <slot v-if="innerPlaylist" name="pseudo" :selected="innerPlaylist"></slot>
       </div>
     </script>
 
@@ -42,7 +42,7 @@
           useIntersect: { type: Boolean, default: true },
           chosenId: { type: String, default: '' },
           isOpenedMoreInfo: { type: Boolean, default: false },
-          selectedPlaylist: { type: Object, default: () => ({}) },
+          selectedPlaylist: { type: Object, default: null },
         },
 
         data() {
@@ -51,10 +51,28 @@
             isSliderIntersect: false,
             player: null,
             timeIsOver: false,
+            innerPlaylist: this.selectedPlaylist,
           };
         },
 
         watch: {
+          innerPlaylist: {
+            handler(val) {
+              if (!val) return;
+
+              this.timeIsOver = false;
+              
+              if (!_.isEqual(this.selectedPlaylist, val)) {
+                this.$emit('update:selectedPlaylist', _.cloneDeep(val));
+              }
+
+              this.player.source = this.innerPlaylist.content.playlist_url;
+              this.player.poster = this.innerPlaylist.content.poster.image_url;
+              this.player.seek(this.innerPlaylist.start_offset);
+              this.player.play();
+            }
+          },
+
           slide: {
             deep: true,
             handler(value) {
@@ -70,6 +88,7 @@
           },
 
           isOpenedMoreInfo(value) {
+            if (this.timeIsOver) return;
             if (value) {
               this.player.pause();
             }
@@ -81,13 +100,9 @@
           selectedPlaylist: {
             deep: true,
             handler(val) {
-              if (!val) return;
-
-              this.player.source = this.selectedPlaylist.content.playlist_url;
-              this.player.poster = this.selectedPlaylist.content.poster.image_url;
-              this.player.seek(this.selectedPlaylist.start_offset);
-              //this.player.options.events.onTimeUpdate({ current: this.selectedPlaylist.start_offset });
-              this.player.play();
+              if (_.isEqual(val, this.innerPlaylist)) return;
+              this.timeIsOver = false;
+              this.innerPlaylist = _.cloneDeep(val);
             },
           },
         },
@@ -96,26 +111,29 @@
           const vm = this;
           var playerElement = document.getElementById(this.targetId);
 
+          this.innerPlaylist = _.cloneDeep(this.selectedPlaylist) || _.head(this.moments);
+
           vm.player = new Clappr.Player({
-            source: this.selectedPlaylist.content.playlist_url,
-            poster: this.selectedPlaylist.content.poster.image_url,
+            source: this.innerPlaylist.content.playlist_url,
+            poster: this.innerPlaylist.content.poster.image_url,
             mute: true,
             width: '100%',
             height: '100%',
             chromeless: true,
             events: {
               onReady() {
-                if (vm.selectedPlaylist.start_offset) {
-                  this.seek(vm.selectedPlaylist.start_offset);
+                if (vm.innerPlaylist.start_offset) {
+                  this.seek(vm.innerPlaylist.start_offset);
                 }
               },
               onTimeUpdate(statusObject) {
-                if (statusObject.current >= vm.selectedPlaylist.end_offset) {
-                  const nextMoment = vm.moments[_.findIndex(vm.moments, { id: vm.selectedPlaylist.id }) + 1];
+                if (statusObject.current >= vm.innerPlaylist.end_offset) {
+                  const nextMoment = vm.moments[_.findIndex(vm.moments, { id: vm.innerPlaylist.id }) + 1];
                   if (nextMoment) {
-                    vm.$emit('update:selectedPlaylist', nextMoment);
+                    vm.innerPlaylist =  nextMoment;
+                    vm.$emit('update', nextMoment);
                     vm.player.configure({
-                      source: vm.selectedPlaylist.content.playlist_url,
+                      source: vm.innerPlaylist.content.playlist_url,
                     });
                     vm.player.play();
                   }
@@ -177,23 +195,27 @@
 
           <div class="slider">
             <div v-if="selectedMoment" class="choosen-moment">
-              <div v-for="moment in _.take(collections, 4)" class="choosen-moment__actions" :key="moment.id" >
-                <div class="button" :style="{ 'background-color': moment.color}">
-                  {{ moment.title }}
-                </div>
-                <div v-if="_.size(collections) > 4" @click="isOpenedMenu = true" class="button button-red">
-                  Показать все +
+              <div class="actions-container">
+                <div v-for="moment in _.take(collections, 4)" class="choosen-moment__actions" :key="moment.id" >
+                  <div @click="getChannel(moment)" class="button" :style="{ 'background-color': moment.color}">
+                    {{ moment.title }}
+                  </div>
+                  <div v-if="_.size(collections) > 4" @click="isOpenedMenu = true" class="button button-red">
+                    Показать все +
+                  </div>
                 </div>
               </div>
+              
               <div class="choosen-moment__item--container">
                 <vue-slide
                   :chosen-id="selectedMoment.id"
                   class="chosen-moment"
-                  :moments="selectedMoment.moments"
+                  :moments="fullMoments"
                   :slide="selectedMoment"
                   :use-intersect="false"
                   :is-opened-more-info="isOpenedMoreInfo"
                   :selected-playlist.sync="selectedPlaylist"
+                  @update="setMoment"
                   >
                   <template v-slot:pseudo="{ selected }">
                     <div v-if="isOpenedMoreInfo" class="slider-item-banner__contaier">
@@ -240,20 +262,37 @@
                     </div>
                   </template>
                 </vue-slide>
+
+                <div class="pagination-moments">
+                  <div>
+                    <img
+                      v-if="(fullMoments && selectedPlaylist) && _.head(fullMoments).id !== selectedPlaylist.id"
+                      class="pagination-left" src="img/arrow.svg" alt=""
+                      @click="getPrev()"
+                      >
+                  </div>
+
+                  <div>
+                    <img
+                      v-if="(fullMoments && selectedPlaylist) && _.last(fullMoments).id !== selectedPlaylist.id"
+                      class="pagination-right" src="img/arrow.svg" alt=""
+                      @click="getNext()"
+                      >
+                  </div>
+                </div>
               </div>
             </div>
 
-            <template v-else>
+            <div v-else>
               <div v-if="_.size(collections)" class="swiper-container">
                 <div class="swiper-wrapper">
                   <div v-for="slide in collections" :key="slide.id" class="swiper-slide slider-item">
                     <vue-slide
                       :slide="slide"
                       :moments="slide.moments"
-                      :selected-playlist.sync="selectedPlaylist"
                       >
                       <template v-slot:pseudo="{ selected }">
-                        <div class="swiper-slide-pseudo" @click="selectedMoment = slide">
+                        <div class="swiper-slide-pseudo" @click="getChannel(slide)">
                           <div class="slider-item--more-content">
                             <img src="img/more-content.png" alt="">
                           </div>
@@ -269,7 +308,7 @@
                 </div>
                 <div class="swiper-scrollbar"></div>
               </div>
-            </template>  
+            </div>  
             
           </div>
 
@@ -356,16 +395,6 @@
         el: "#app",
         data() {
           return {
-            moments: [{
-              id: 1,
-              name: 'Амели',
-              year: '2001',
-              description: 'Вы можете продолжить смотреть этот фильм на Vip Play'
-            }],
-            choosenMoments: [{
-              id: 1,
-              name: 'Какой-то выбранный момент',
-            }],
             isOpenedMenu: false,
             menuList: [
               {
@@ -426,11 +455,48 @@
           };
         },
 
+        computed: {
+          fullMoments() {
+            if (!_.size(this.collections) || !this.selectedPlaylist) return;
+            return _.flatten(_.map(this.collections, (o, idx) => _.map(o.moments, m => { return { $idx: idx, ...m } })));
+          },
+        },
+
+        methods: {
+          updateContent(moment) {
+            this[moment.type] = moment.content;
+          },
+          setMoment(playlist) {
+            this.selectedPlaylist = playlist;
+            this.selectedMoment = this.collections[playlist.$idx];
+          },
+          getChannel(channel) {
+            this.selectedMoment = channel;
+            this.selectedPlaylist = _.head(channel.moments);
+          },
+          getPrev() {
+            const selectedPlaylist = this.fullMoments[ _.findIndex(this.fullMoments, { id: this.selectedPlaylist.id }) - 1 ];
+
+            if (!selectedPlaylist) return;
+
+            this.selectedPlaylist = selectedPlaylist;
+            this.selectedMoment = this.collections[selectedPlaylist.$idx];
+          },
+          getNext() {
+            const selectedPlaylist = this.fullMoments[ _.findIndex(this.fullMoments, { id: this.selectedPlaylist.id }) + 1 ];
+
+            if (!selectedPlaylist) return;
+
+            this.selectedPlaylist = selectedPlaylist;
+            this.selectedMoment = this.collections[selectedPlaylist.$idx];
+          },
+        },
+
         watch: {
           selectedMoment: {
             handler(val) {
               if (!val) return;
-              this.selectedPlaylist = _.head(val.moments);
+              //this.selectedPlaylist = _.head(val.moments);
             },
             deep: true,
           },

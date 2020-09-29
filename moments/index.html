@@ -200,7 +200,9 @@
                   <div @click="getChannel(moment)" class="button" :style="{ 'background-color': moment.color}">
                     {{ moment.title }}
                   </div>
-                  <div v-if="_.size(collections) > 4" @click="isOpenedMenu = true" class="button button-red">
+                </div>
+                <div class="choosen-moment__actions">
+                  <div @click="isOpenedMenu = true" class="button button-red">
                     Показать все +
                   </div>
                 </div>
@@ -362,18 +364,18 @@
         </div>
         <div class="menu-list">
           <div
-            v-for="item in menuList"
+            v-for="item in collections"
             :key="item.id"
             class="menu-item"
             >
-            <div class="menu-item__moment">{{ item.name }}</div>
+            <div class="menu-item__moment">{{ item.title }}</div>
             <div class="menu-item__films">
               <div
-                v-for="film in item.films"
+                v-for="film in item.moments"
                 :key="film.id"
                 class="films-item"
                 >
-                <h2>{{ film.name }}</h2>
+                <h2 @click="setMoment(film, item); isOpenedMenu = false;">{{ film.title }}</h2>
               </div>
             </div>
           </div>
@@ -466,9 +468,9 @@
           updateContent(moment) {
             this[moment.type] = moment.content;
           },
-          setMoment(playlist) {
+          setMoment(playlist, moment) {
             this.selectedPlaylist = playlist;
-            this.selectedMoment = this.collections[playlist.$idx];
+            this.selectedMoment = moment || this.collections[playlist.$idx];
           },
           getChannel(channel) {
             this.selectedMoment = channel;

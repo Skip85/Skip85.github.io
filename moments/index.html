@@ -13,6 +13,7 @@
     <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
     <script src="https://unpkg.com/async-oauth-popup@1.0.3/dist/index.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.7.0/qs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-social-sharing@3.0.0-beta.11/dist/vue-social-sharing.min.js"></script>
 
     <link href="style.css" rel="stylesheet">
 
@@ -114,12 +115,18 @@
           this.innerPlaylist = _.cloneDeep(this.selectedPlaylist) || _.head(this.moments);
 
           vm.player = new Clappr.Player({
+            language: 'ru',
             source: this.innerPlaylist.content.playlist_url,
             poster: this.innerPlaylist.content.poster.image_url,
             mute: true,
             width: '100%',
             height: '100%',
             chromeless: true,
+            strings: {
+              ru: {
+                playback_not_supported: 'Приносим свои извинения, данное видео сейчас недоступно, попробуйте позднее',
+              },
+            },
             events: {
               onReady() {
                 if (vm.innerPlaylist.start_offset) {
@@ -142,7 +149,10 @@
                     vm.timeIsOver = true;
                   }
                 }
-              }
+              },
+              onError() {
+                vm.player.stop();
+              },
             }
           });
 
@@ -354,7 +364,25 @@
           <div class="button-container">
             <div class="button button-outline-light">Попробовать</div>
           </div>
-          <div class="socials">Поделиться: инстаграме, фейсбуке, вконтакте</div>
+          <div class="socials">
+            <div>Поделиться:</div> 
+            <share-network
+              class="social-item"
+              network="facebook"
+              :url="location"
+              title="Моменты ViP Play"
+              >
+              Фейсбук
+            </share-network>
+            <share-network
+              class="social-item"
+              network="vk"
+              :url="location"
+              title="Моменты ViP Play"
+              >
+              Вконтакте
+            </share-network>
+          </div>
         </div>
       </div>
 
@@ -392,6 +420,8 @@
           }),
         }
       });
+
+      Vue.component('share-network', Vue.extend(VueSocialSharing.ShareNetwork));
 
       var $vue = new Vue({
         el: "#app",
@@ -454,6 +484,7 @@
             collections: [],
             isOpenedMoreInfo: false,
             selectedPlaylist: null, // Конктерный фильм
+            location: window.location.href,
           };
         },
 

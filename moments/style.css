@@ -566,6 +566,23 @@ p {
 /* </ PSEUDO SLIDER > */
 
 
+/* < SOCIALS > */
+
+.socials {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.social-item {
+  cursor: pointer;
+  padding: 10px;
+}
+
+/* </ SOCIALS > */
+
+
 /* < MEDIA > */
 
 @media (max-width: 998px) {
@@ -672,5 +689,14 @@ p {
   }
   .banner-description {
     font-size: 16px;
+  }
+
+  .socials {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  br {
+    display: none;
   }
 }

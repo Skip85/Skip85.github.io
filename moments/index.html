@@ -62,7 +62,7 @@
               if (!val) return;
 
               this.timeIsOver = false;
-              
+
               if (!_.isEqual(this.selectedPlaylist, val)) {
                 this.$emit('update:selectedPlaylist', _.cloneDeep(val));
               }
@@ -70,7 +70,12 @@
               this.player.source = this.innerPlaylist.content.playlist_url;
               this.player.poster = this.innerPlaylist.content.poster.image_url;
               this.player.seek(this.innerPlaylist.start_offset);
-              this.player.play();
+              if (this.isOpenedMoreInfo) {
+                this.player.pause();
+              }
+              else {
+                this.player.play();
+              }
             }
           },
 
@@ -203,7 +208,7 @@
             все для того, чтобы вы быстрее нашли правильное кино
           </p>
 
-          <div class="slider">
+          <div name="slider" class="slider">
             <div v-if="selectedMoment" class="choosen-moment">
               <div class="actions-container">
                 <div v-for="moment in _.take(collections, 4)" class="choosen-moment__actions" :key="moment.id" >
@@ -217,7 +222,7 @@
                   </div>
                 </div>
               </div>
-              
+
               <div class="choosen-moment__item--container">
                 <vue-slide
                   :chosen-id="selectedMoment.id"
@@ -321,7 +326,7 @@
                 <div class="swiper-scrollbar"></div>
               </div>
             </div>  
-            
+
           </div>
 
           <h2>Почему так проще <br> выбрать кино</h2>
@@ -362,7 +367,7 @@
           <h2>Выбирайте кино <br> прямо сейчас</h2>
           <p class="bottom-description">Вспоминайте любимое и открывайте новое — <br> подберите кино для настроения</p>
           <div class="button-container">
-            <div class="button button-outline-light">Попробовать</div>
+            <div @click="scrollToSlider" class="button button-outline-light">Попробовать</div>
           </div>
           <div class="socials">
             <div>Поделиться:</div> 
@@ -523,15 +528,14 @@
             this.selectedPlaylist = selectedPlaylist;
             this.selectedMoment = this.collections[selectedPlaylist.$idx];
           },
-        },
+          scrollToSlider() {
+            const offset = _.get(document.getElementsByName('slider')[0], 'offsetTop');
+            if (!offset) return;
 
-        watch: {
-          selectedMoment: {
-            handler(val) {
-              if (!val) return;
-              //this.selectedPlaylist = _.head(val.moments);
-            },
-            deep: true,
+            window.scrollTo({
+              top: offset - 20, // Делаем offset с небольшим отступом
+              behavior: "smooth",
+            });
           },
         },
 
@@ -589,6 +593,6 @@
           });
         }
       });
-    </script>    
+    </script>
   </body>
 </html>

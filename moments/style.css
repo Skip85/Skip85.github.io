@@ -649,6 +649,15 @@ p {
     line-height: 18px;
   }
 
+  .films-item h2 {
+    font-size: 24px;
+  }
+
+  .menu-list {
+    margin: 0 30px;
+    margin-top: 60px;
+  }
+
   h2 {
     font-size: 36px;
     line-height: 40px;

@@ -248,7 +248,7 @@
                             Вы можете продолжить смотреть этот фильм на Vip Play
                           </div>
                           <div class="banner-actions">
-                            <div class="button button-outline-red">Перейти к просмотру</div>
+                            <a :href="`https://vipplay.ru/filmy/${selected.content.slug}`" class="button button-outline-red">Перейти к просмотру</a>
                             <div @click="isOpenedMoreInfo = false" class="button button-red">Вернуться к моментам</div>
                           </div>
                         </div>

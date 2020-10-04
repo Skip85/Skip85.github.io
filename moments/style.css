@@ -72,6 +72,7 @@ p {
   padding: 8px 16px;
   cursor: pointer;
   border-color: transparent;
+  text-decoration: none;
 }
 
 .button-outline {
@@ -202,6 +203,7 @@ p {
 
 .actions-container {
   display: flex;
+  flex-wrap: wrap;
 }
 
 .choosen-moment__actions .button {
@@ -630,6 +632,11 @@ p {
 }
 
 @media (max-width: 768px) {
+  .chosen-moment__title {
+    font-size: 14px;
+    line-height: 18px;
+  }
+
   .container {
     padding: 0 10px;
   }
@@ -699,11 +706,15 @@ p {
   br {
     display: none;
   }
+
+  .play-wrapper {
+    display: none;
+  }
 }
 
 
 /* < PLAYER > */
   .play-wrapper {
-    display: none;
+    display: none !important;
   }
 /* </ PLAYER > */

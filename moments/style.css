@@ -510,10 +510,14 @@ p {
     left: 0;
     z-index: 2;
     background: rgba(0, 0, 0, .3);
-    padding: 30px;
+  }
+
+  .chosen-container {
+    position: relative;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 30px;
   }
 
   .chosen-moment {
@@ -528,8 +532,8 @@ p {
   }
   .emoji-item {
     position: relative;
-    font-size: 24px;
-    padding: 15px;
+    font-size: 22px;
+    padding: 5px;
     background: rgba(233, 233, 241, 0.3);
     backdrop-filter: blur(4px);
     border-radius: 50%;
@@ -561,7 +565,7 @@ p {
     cursor: pointer;
   }
   .emoji-item__selected {
-    font-size: 34px;
+    font-size: 30px;
     min-width: 65;
     min-height: 65px;
   }
@@ -632,9 +636,21 @@ p {
 }
 
 @media (max-width: 768px) {
+  .button {
+    font-size: 12px;
+  }
+
+  .chosen-container {
+    padding: 10px;
+  }
   .chosen-moment__title {
     font-size: 14px;
     line-height: 18px;
+    margin-right: 10px;
+  }
+
+  .pagination-left, .pagination-right {
+    padding: 10px;
   }
 
   .container {
@@ -680,6 +696,18 @@ p {
     font-size: 16px;
   }
   
+
+  .chosen-moment__emoji {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 10px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
   .chosen-moment {
     position: relative;

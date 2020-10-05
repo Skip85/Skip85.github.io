@@ -256,25 +256,27 @@
                     </div>
 
                     <div v-else class="chosen-more-info">
-                      <div class="chosen-moment__title">
-                        {{ selected.title }}
-                      </div>
-
-                      <div class="chosen-moment__emoji">
-                        <div
-                          class="emoji-item"
-                          :class="{ 'emoji-item__selected': emojiItem.id === selected.id }"
-                          v-for="(emojiItem, idxE) in selectedMoment.moments"
-                          :key="idxE"
-                          >
-                          <div @click="selectedPlaylist = emojiItem" class="emoji">
-                            {{ emojiItem.emoji }}
+                      <div class="chosen-container">
+                        <div class="chosen-moment__title">
+                          {{ selected.title }}
+                        </div>
+  
+                        <div class="chosen-moment__emoji">
+                          <div
+                            class="emoji-item"
+                            :class="{ 'emoji-item__selected': emojiItem.id === selected.id }"
+                            v-for="(emojiItem, idxE) in selectedMoment.moments"
+                            :key="idxE"
+                            >
+                            <div @click="selectedPlaylist = emojiItem" class="emoji">
+                              {{ emojiItem.emoji }}
+                            </div>
                           </div>
                         </div>
-                      </div>
-
-                      <div class="chosen-moment__continue">
-                        <div @click="isOpenedMoreInfo = true" class="button button-outline">Продолжить</div>
+  
+                        <div class="chosen-moment__continue">
+                          <div @click="isOpenedMoreInfo = true" class="button button-outline">Продолжить</div>
+                        </div>
                       </div>
                     </div>
                   </template>

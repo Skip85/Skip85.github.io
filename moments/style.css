@@ -272,7 +272,6 @@ p {
 .slider-item-banner__contaier {
   position: absolute;
   top: 0;
-  bottom: 0;
   left: 0;
   right: 0;
   display: flex;
@@ -280,6 +279,7 @@ p {
   justify-content: center;
   background-color: rgba(0, 0, 0, .8);
   z-index: 88;
+  height: 100%;
 }
 
 .slider-item-banner {
@@ -692,8 +692,40 @@ p {
     line-height: 18px;
   }
 
+  .item-banner__info {
+    margin-left: 0;
+    margin-top: 20px;
+  }
+
+  .banner-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .banner-actions .button {
+    padding: 5px;
+  }
+  .banner-actions .button-red {
+    margin-left: 5px;
+  }
+
   .content-name {
     font-size: 16px;
+  }
+
+  .slider-item-banner {
+    flex-direction: column;
+  }
+
+  .item-banner__image-container {
+    width: 100%;
+    object-fit: contain;
+    max-width: 130px;
+  }
+
+  .banner-title, .banner-description {
+    text-align: center;
   }
   
 

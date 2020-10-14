@@ -28,7 +28,7 @@
   <body>
     <script type="text/x-template" id="vue-slide-template">
       <div>
-        <div class="player-container" :id="targetId" style="background: red;"></div>
+        <div class="player-container" :id="targetId"></div>
         <slot v-if="innerPlaylist" name="pseudo" :selected="innerPlaylist"></slot>
       </div>
     </script>
@@ -305,7 +305,7 @@
             <div v-else>
               <div v-if="_.size(collections)" class="swiper-container">
                 <div class="swiper-wrapper">
-                  <div v-for="slide in collections" :key="slide.id" class="swiper-slide slider-item">
+                  <div v-for="slide in collections" :key="slide.id" class="swiper-slide slider-item" v-if="_.size(slide.moments)">
                     <vue-slide
                       :slide="slide"
                       :moments="slide.moments"

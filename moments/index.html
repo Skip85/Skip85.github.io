@@ -178,7 +178,7 @@
     </script>
 
     <div id="app">
-      <div class="header">
+      <div id="header" class="header">
         <div class="container">
           <img class="icon" src="img/icon.svg" alt="">
           <h1 class="title">Как быстро <br> выбрать кино?</h1>
@@ -203,7 +203,7 @@
 
       <div class="moments-container">
         <div class="container">
-          <h2>Выбирайте <br> через моменты</h2>
+          <h2 name="slider-title">Выбирайте <br> через моменты</h2>
           <p class="moments-container__description">Колдовство, классика жанра, российские премьеры — мы собрали <br>
             все для того, чтобы вы быстрее нашли правильное кино
           </p>
@@ -405,13 +405,19 @@
             >
             <div class="menu-item__moment">{{ item.title }}</div>
             <div class="menu-item__films">
-              <div
-                v-for="film in item.moments"
-                :key="film.id"
-                class="films-item"
-                >
-                <h2 @click="setMoment(film, item); isOpenedMenu = false;">{{ film.title }}</h2>
-              </div>
+              <template v-if="_.size(item.moments)">
+                <div
+                  v-for="film in item.moments"
+                  :key="film.id"
+                  class="films-item"
+                  >
+                  <h2 @click="setMoment(film, item); isOpenedMenu = false;">{{ film.title }}</h2>
+                </div>
+              </template>
+
+              <template v-else>
+                <p>Нет данных</p>
+              </template>
             </div>
           </div>
         </div>
@@ -435,56 +441,6 @@
         data() {
           return {
             isOpenedMenu: false,
-            menuList: [
-              {
-                id: 1,
-                name: 'Сцены с поцелуями',
-                films: [
-                  {
-                    id: 1,
-                    name: 'Амели',
-                    year: '2001',
-                    description: 'Вы можете продолжить смотреть этот фильм на Vip Play',
-                  },
-                  {
-                    id: 2,
-                    name: 'Колдуй с Гарри Поттером',
-                    year: '2001',
-                    description: 'Вы можете продолжить смотреть этот фильм на Vip Play',
-                  },
-                  {
-                    id: 3,
-                    name: 'Сцены с драками',
-                    year: '2001',
-                    description: 'Вы можете продолжить смотреть этот фильм на Vip Play',
-                  },
-                ],
-              },
-              {
-                id: 2,
-                name: 'Сцены с поцелуями',
-                films: [
-                  {
-                    id: 1,
-                    name: 'Амели',
-                    year: '2001',
-                    description: 'Вы можете продолжить смотреть этот фильм на Vip Play',
-                  },
-                ],
-              },
-              {
-                id: 3,
-                name: 'Сцены с поцелуями',
-                films: [
-                  {
-                    id: 1,
-                    name: 'Амели',
-                    year: '2001',
-                    description: 'Вы можете продолжить смотреть этот фильм на Vip Play',
-                  },
-                ],
-              },
-            ],
             isSliderIntersect: false,
             player: null,
             selectedMoment: null, // Конкретный момент (содержит коллекцию фильмов)
@@ -531,11 +487,11 @@
             this.selectedMoment = this.collections[selectedPlaylist.$idx];
           },
           scrollToSlider() {
-            const offset = _.get(document.getElementsByName('slider')[0], 'offsetTop');
+            const offset = _.get(document.getElementsByName('slider-title')[0], 'offsetTop');
             if (!offset) return;
 
             window.scrollTo({
-              top: offset - 20, // Делаем offset с небольшим отступом
+              top: offset + 150, // Убираю offset от padding
               behavior: "smooth",
             });
           },
@@ -585,14 +541,43 @@
 
             const observer = new IntersectionObserver(callback, options);
             for ( let i = 0; i < this.collections.length; i++) {
-              var options = {
-                rootMargin: '0px',
-                threshold: 1.0,
-                id: vm.collections[i].id,
-              };
-              observer.observe(document.querySelector(`#slide-${vm.collections[i].id}`));
+              if (_.size(vm.collections[i].moments)) {
+                var options = {
+                  rootMargin: '0px',
+                  threshold: 1.0,
+                  id: vm.collections[i].id,
+                };
+                observer.observe(document.querySelector(`#slide-${vm.collections[i].id}`));
+              }
             }
           });
+
+          const playerElement = document.getElementById('header');
+          
+          vm.player = new Clappr.Player({
+            language: 'ru',
+            source: './src/header-video.mp4',
+            poster: './img/header-banner.png',
+            mute: true,
+            width: '100%',
+            height: '100%',
+            chromeless: true,
+            loop: true,
+            strings: {
+              ru: {
+                playback_not_supported: 'Приносим свои извинения, данное видео сейчас недоступно, попробуйте позднее',
+              },
+            },
+            events: {
+              onError() {
+                vm.player.stop();
+              },
+            }
+          });
+
+          vm.player.attachTo(playerElement);
+          
+          vm.player.play();
         }
       });
     </script>

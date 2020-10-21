@@ -67,9 +67,11 @@
                 this.$emit('update:selectedPlaylist', _.cloneDeep(val));
               }
 
-              this.player.source = this.innerPlaylist.content.playlist_url;
-              this.player.poster = this.innerPlaylist.content.poster.image_url;
-              this.player.seek(this.innerPlaylist.start_offset);
+              this.player.configure({
+                source: val.content.playlist_url,
+                poster: val.content.poster.image_url,
+              });
+              this.player.seek(val.start_offset);
               if (this.isOpenedMoreInfo) {
                 this.player.pause();
               }

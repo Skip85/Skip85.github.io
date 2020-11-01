@@ -74,6 +74,10 @@ p {
   border-color: transparent;
   text-decoration: none;
 }
+.button:hover, .button.active {
+  background-color: transparent !important;
+  border-color: #FFFFFF;
+}
 
 .button-outline {
   border-color: #FFFFFF;
@@ -233,10 +237,16 @@ p {
 }
 
 .chosen-moment__title {
-  font-size: 24px;
-  line-height: 32px;
+  font-size: 20px;
+  line-height: 24px;
   font-weight: 700;
   flex: 1;
+}
+
+.chosen-moment__continue {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .choosen-moment__item--container {
@@ -325,6 +335,7 @@ p {
 /* BOTTOM */
 
 .bottom {
+  position: relative;
   background-color: #E20338;
 }
 
@@ -373,6 +384,18 @@ p {
   text-align: center;
   margin-top: 167px;
   padding-bottom: 96px;
+}
+
+.socials * {
+  z-index: 2;
+}
+
+.footer-image {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 800px;
+  max-width: 50%;
 }
 
 
@@ -539,7 +562,8 @@ p {
   .chosen-moment__emoji {
     display: flex;
     align-items: center;
-    flex: 1;
+    justify-content: center;
+    flex: 2;
   }
   .emoji-item {
     position: relative;
@@ -552,6 +576,7 @@ p {
     min-width: 45px;
     min-height: 45px;
     margin: 0 8px;
+    opacity: .5;
   }
   .emoji-item:hover {
     background: rgba(233, 233, 241, 0.5);
@@ -579,6 +604,7 @@ p {
     font-size: 30px;
     min-width: 65;
     min-height: 65px;
+    opacity: 1;
   }
 /* </ PSEUDO SLIDER > */
 
@@ -594,7 +620,17 @@ p {
 
 .social-item {
   cursor: pointer;
-  padding: 10px;
+  padding: 10px 0;
+  margin: 0 10px;
+  border-bottom: 1px solid transparent;
+}
+.social-item:hover {
+  border-bottom-color: #FFFFFF;
+}
+
+
+.social-item-name {
+  padding: 10px 0;
 }
 
 /* </ SOCIALS > */
@@ -609,6 +645,7 @@ p {
 
   .moments-container .about {
     margin: 0;
+    margin-top: 50px;
   }
 
   .chosen-moment {
@@ -738,6 +775,10 @@ p {
   .banner-title, .banner-description {
     text-align: center;
   }
+
+  .swiper-slide {
+    max-width: 80%;
+  }
   
 
   .chosen-moment__emoji {
@@ -789,6 +830,12 @@ p {
 
   .play-wrapper {
     display: none;
+  }
+}
+
+@media (max-width: 500px) {
+  .footer-image {
+    max-width: 100%;
   }
 }
 

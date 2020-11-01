@@ -214,7 +214,7 @@
             <div v-if="selectedMoment" class="choosen-moment">
               <div class="actions-container">
                 <div v-for="moment in _.take(collections, 4)" class="choosen-moment__actions" :key="moment.id" >
-                  <div @click="getChannel(moment)" class="button" :style="{ 'background-color': moment.color}">
+                  <div @click="getChannel(moment)" class="button" :class="{'active': selectedMoment.id === moment.id}" :style="{ 'background-color': moment.color}">
                     {{ moment.title }}
                   </div>
                 </div>
@@ -260,7 +260,7 @@
                     <div v-else class="chosen-more-info">
                       <div class="chosen-container">
                         <div class="chosen-moment__title">
-                          {{ selected.title }}
+                          {{ selected.content.title }}
                         </div>
   
                         <div class="chosen-moment__emoji">
@@ -337,7 +337,7 @@
 
           <div class="about">
             <div class="about-item">
-              <img class="eyes" src="img/eyes.png" alt="">
+              <img class="eyes" src="img/eyes.svg" alt="">
               <p class="about-item__title">Опирайтесь на свои эмоции</p>
               <div class="about-item__description">
                 Часто рейтинги и чужие мнения не дают представления о фильме, а наоборот искажают ожидания.
@@ -346,7 +346,7 @@
             </div>
 
             <div class="about-item">
-              <img class="lightning" src="img/lightning.png" alt="">
+              <img class="lightning" src="img/lightning.svg" alt="">
               <p class="about-item__title">Опирайтесь на свои эмоции</p>
               <div class="about-item__description">
                 Часто рейтинги и чужие мнения не дают представления о фильме, а наоборот искажают ожидания.
@@ -374,7 +374,7 @@
             <div @click="scrollToSlider" class="button button-outline-light">Попробовать</div>
           </div>
           <div class="socials">
-            <div>Поделиться:</div> 
+            <div class="social-item-name">Поделиться:</div> 
             <share-network
               class="social-item"
               network="facebook"
@@ -393,6 +393,7 @@
             </share-network>
           </div>
         </div>
+        <img class="footer-image" src="img/footer-image.svg" alt="">
       </div>
 
       <div v-if="isOpenedMenu" class="menu-container">
@@ -525,7 +526,7 @@
                   spaceBetween: 10,
                 },
                 400: {
-                  slidesPerView: 1,
+                  slidesPerView: 'auto',
                   spaceBetween: 10,
                 },
                 768: {

@@ -75,8 +75,11 @@ p {
   text-decoration: none;
 }
 .button:hover, .button.active {
-  background-color: transparent !important;
+  background-color: transparent;
   border-color: #FFFFFF;
+}
+.button.active {
+  background-color: transparent !important;
 }
 
 .button-outline {
@@ -90,7 +93,7 @@ p {
 }
 
 .button-outline-light:hover {
-  background-color: #FFFFFF;
+  background-color: #FFFFFF !important;
   color: #E20338;
   font-weight: 600;
 }
@@ -218,7 +221,9 @@ p {
 
 .actions-container {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  white-space: nowrap;
 }
 
 .choosen-moment__actions .button {
@@ -409,6 +414,8 @@ p {
   right: 0;
   background-color: #231F20;
   z-index: 99;
+  overflow-y: auto;
+  padding-bottom: 30px;
 }
 
 .menu-close {
@@ -568,8 +575,7 @@ p {
   .emoji-item {
     position: relative;
     font-size: 22px;
-    padding: 5px;
-    background: rgba(233, 233, 241, 0.3);
+    background:#E9E9F1;
     backdrop-filter: blur(4px);
     border-radius: 50%;
     overflow: hidden;
@@ -579,7 +585,7 @@ p {
     opacity: .5;
   }
   .emoji-item:hover {
-    background: rgba(233, 233, 241, 0.5);
+    background: rgba(233, 233, 241, 0.7);
   }
   .emoji-item:after {
     content: "";
@@ -589,8 +595,6 @@ p {
 
   .emoji {
     position: absolute;
-    width: 100%;
-    height: 100%;
     top: 0;
     bottom: 0;
     right: 0;
@@ -600,11 +604,29 @@ p {
     justify-content: center;
     cursor: pointer;
   }
+  .emoji svg {
+    width: 100%;
+    height: 100%;
+  }
   .emoji-item__selected {
     font-size: 30px;
-    min-width: 65;
-    min-height: 65px;
+    width: 65px;
+    height: 65px;
     opacity: 1;
+    overflow: visible;
+  }
+
+  .emoji-item__selected .emoji {
+    width: 75px;
+    height: 75px;
+  }
+
+  .emoji-item__selected .emoji-container {
+    position: absolute;
+    width: 75px;
+    height: 75px;
+    top: -5px;
+    left: -5px;
   }
 /* </ PSEUDO SLIDER > */
 
@@ -758,6 +780,10 @@ p {
     margin-left: 5px;
   }
 
+  .button.button-continue:hover {
+    background-color: #FFFFFF !important;
+  }
+
   .content-name {
     font-size: 16px;
   }
@@ -791,6 +817,7 @@ p {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-wrap: wrap;
   }
 
   .chosen-moment {

@@ -15,6 +15,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.7.0/qs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue-social-sharing@3.0.0-beta.11/dist/vue-social-sharing.min.js"></script>
 
+    <!-- /loading bar -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/progressbar.js/0.6.1/progressbar.min.js"></script>
+
     <link href="style.css" rel="stylesheet">
 
     <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@600;800;900&display=swap" rel="stylesheet">
@@ -53,12 +56,14 @@
             player: null,
             timeIsOver: false,
             innerPlaylist: this.selectedPlaylist,
+            loadBar: null,
           };
         },
 
         watch: {
           innerPlaylist: {
             handler(val) {
+              const vm = this;
               if (!val) return;
 
               this.timeIsOver = false;
@@ -77,6 +82,19 @@
               }
               else {
                 this.player.play();
+                this.$nextTick(() => {
+                if (vm.loadBar) vm.loadBar.destroy();
+                if (document.getElementById(`emoji-${val.id}`)) {
+                  vm.loadBar = new ProgressBar.Circle(`#emoji-${val.id}`, {
+                    strokeWidth: 3,
+                    duration: (val.end_offset - val.start_offset) * 1000,
+                    color: '#E20338',
+                    trailColor: '#fff',
+                    trailWidth: 3,
+                    svgStyle: null,
+                  });
+                }
+              });
               }
             }
           },
@@ -156,6 +174,11 @@
                     vm.timeIsOver = true;
                   }
                 }
+                if (vm.loadBar) {
+                  const full = vm.innerPlaylist.end_offset - vm.innerPlaylist.start_offset;
+                  const a = (statusObject.current - vm.innerPlaylist.start_offset) / full;
+                  vm.loadBar.set(a);
+                } 
               },
               onError() {
                 vm.player.stop();
@@ -270,14 +293,14 @@
                             v-for="(emojiItem, idxE) in selectedMoment.moments"
                             :key="idxE"
                             >
-                            <div @click="selectedPlaylist = emojiItem" class="emoji">
-                              {{ emojiItem.emoji }}
+                            <div class="emoji-container" :id="`emoji-${emojiItem.id}`" @click="selectedPlaylist = emojiItem">
+                              <span class="emoji" style="position: absolute;" >{{ emojiItem.emoji }}</span>
                             </div>
                           </div>
                         </div>
   
                         <div class="chosen-moment__continue">
-                          <div @click="isOpenedMoreInfo = true" class="button button-outline">Продолжить</div>
+                          <div @click="isOpenedMoreInfo = true" class="button button-outline button-continue">Продолжить</div>
                         </div>
                       </div>
                     </div>
@@ -516,13 +539,14 @@
               slidesPerView: 2,
               spaceBetween: 30,
               slidesOffsetAfter: 20,
+              freeModeSticky: true,
               pagination: {
                 el: '.swiper-pagination',
                 clickable: true,
               },
               breakpoints: {
                 0: {
-                  slidesPerView: 1,
+                  slidesPerView: 'auto',
                   spaceBetween: 10,
                 },
                 400: {

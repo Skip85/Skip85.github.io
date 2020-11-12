@@ -180,6 +180,9 @@
                   vm.loadBar.set(a);
                 } 
               },
+              onSeek() {
+                vm.play();
+              },
               onError() {
                 vm.player.stop();
               },

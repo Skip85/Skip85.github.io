@@ -202,7 +202,7 @@
           $('.player').find('video').attr('webkit-playsinline', 'webkit-playsinline');
           $('.player').find('video').attr('playsinline', 'playsinline');
           $('.player').find('video').attr('x-webkit-playsinline', 'x-webkit-playsinline');
-          $('.player').find('video')[0] && $(this.$refs.player).find('video')[0].addEventListener('touchstart', () => {
+          $('.player').find('video')[0] && $('.player').find('video')[0].addEventListener('touchstart', () => {
             vm.player.core.mediaControl.show();
           });
         },

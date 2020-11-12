@@ -562,24 +562,24 @@
               },
             });
 
-            const callback = function(entries, observer) {
-              entries.forEach(entry => {
-                const idx = _.findIndex(vm.collections, { id: _.replace(entry.target.id, 'slide-', '') });
-                vm.$set(vm.collections[idx], '$isIntersecting', entry.isIntersecting);
-              });
-            };
+            // const callback = function(entries, observer) {
+            //   entries.forEach(entry => {
+            //     const idx = _.findIndex(vm.collections, { id: _.replace(entry.target.id, 'slide-', '') });
+            //     vm.$set(vm.collections[idx], '$isIntersecting', entry.isIntersecting);
+            //   });
+            // };
 
-            const observer = new IntersectionObserver(callback, options);
-            for ( let i = 0; i < this.collections.length; i++) {
-              if (_.size(vm.collections[i].moments)) {
-                var options = {
-                  rootMargin: '0px',
-                  threshold: 1.0,
-                  id: vm.collections[i].id,
-                };
-                observer.observe(document.querySelector(`#slide-${vm.collections[i].id}`));
-              }
-            }
+            // const observer = new IntersectionObserver(callback, options);
+            // for ( let i = 0; i < this.collections.length; i++) {
+            //   if (_.size(vm.collections[i].moments)) {
+            //     var options = {
+            //       rootMargin: '0px',
+            //       threshold: 1.0,
+            //       id: vm.collections[i].id,
+            //     };
+            //     observer.observe(document.querySelector(`#slide-${vm.collections[i].id}`));
+            //   }
+            // }
           });
 
           const playerElement = document.getElementById('header');

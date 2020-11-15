@@ -52,6 +52,7 @@
         },
 
         data() {
+          const vm = this;
           return {
             targetId: `slide-${this.slide.id}${this.chosenId}`,
             isSliderIntersect: false,
@@ -59,6 +60,42 @@
             timeIsOver: false,
             innerPlaylist: this.selectedPlaylist,
             loadBar: null,
+            events: {
+              onReady() {
+                if (vm.innerPlaylist.start_offset) {
+                  this.seek(vm.innerPlaylist.start_offset);
+                  this.core.mediaControl.resetKeepVisible();
+                }
+              },
+              onTimeUpdate(statusObject) {
+                if (statusObject.current >= vm.innerPlaylist.end_offset) {
+                  const nextMoment = vm.moments[_.findIndex(vm.moments, { id: vm.innerPlaylist.id }) + 1];
+                  if (nextMoment) {
+                    vm.innerPlaylist =  nextMoment;
+                    vm.$emit('update', nextMoment);
+                    vm.player.configure({
+                      source: vm.innerPlaylist.content.playlist_url,
+                    });
+                    vm.player.play();
+                  }
+                  else {
+                    vm.player.stop();
+                    vm.timeIsOver = true;
+                  }
+                }
+                if (vm.loadBar) {
+                  const full = vm.innerPlaylist.end_offset - vm.innerPlaylist.start_offset;
+                  const a = (statusObject.current - vm.innerPlaylist.start_offset) / full;
+                  vm.loadBar.set(a);
+                } 
+              },
+              onSeek() {
+                vm.player.play();
+              },
+              onError() {
+                vm.player.stop();
+              },
+            },
           };
         },
 
@@ -77,8 +114,10 @@
               this.player.configure({
                 source: val.content.playlist_url,
                 poster: val.content.poster.image_url,
+                events: vm.events,
               });
               this.player.seek(val.start_offset);
+              this.player.play();
               if (this.isOpenedMoreInfo) {
                 this.player.pause();
               }
@@ -164,42 +203,7 @@
                 playback_not_supported: 'Приносим свои извинения, данное видео сейчас недоступно, попробуйте позднее',
               },
             },
-            events: {
-              onReady() {
-                if (vm.innerPlaylist.start_offset) {
-                  this.seek(vm.innerPlaylist.start_offset);
-                  this.core.mediaControl.resetKeepVisible();
-                }
-              },
-              onTimeUpdate(statusObject) {
-                if (statusObject.current >= vm.innerPlaylist.end_offset) {
-                  const nextMoment = vm.moments[_.findIndex(vm.moments, { id: vm.innerPlaylist.id }) + 1];
-                  if (nextMoment) {
-                    vm.innerPlaylist =  nextMoment;
-                    vm.$emit('update', nextMoment);
-                    vm.player.configure({
-                      source: vm.innerPlaylist.content.playlist_url,
-                    });
-                    vm.player.play();
-                  }
-                  else {
-                    vm.player.stop();
-                    vm.timeIsOver = true;
-                  }
-                }
-                if (vm.loadBar) {
-                  const full = vm.innerPlaylist.end_offset - vm.innerPlaylist.start_offset;
-                  const a = (statusObject.current - vm.innerPlaylist.start_offset) / full;
-                  vm.loadBar.set(a);
-                } 
-              },
-              onSeek() {
-                vm.player.play();
-              },
-              onError() {
-                vm.player.stop();
-              },
-            }
+            
           });
 
           vm.player.attachTo(playerElement);

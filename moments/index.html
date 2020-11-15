@@ -618,7 +618,6 @@
             height: '100%',
             chromeless: true,
             loop: true,
-            autoPlay: true,
             mimetype: 'application/x-mpegURL',
             playInline: true,
             strings: {
@@ -637,8 +636,10 @@
           });
 
           vm.player.attachTo(playerElement);
-          
-          vm.player.play();
+
+          this.$nextTick(() => {
+            vm.player.play();
+          });
         }
       });
     </script>

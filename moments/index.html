@@ -34,7 +34,7 @@
     <script type="text/x-template" id="vue-slide-template">
       <div>
         <div class="player-container" :id="targetId"></div>
-        <slot v-if="innerPlaylist" name="pseudo" :selected="innerPlaylist"></slot>
+        <slot v-if="innerPlaylist" name="pseudo" :selected="innerPlaylist" :mute="() => mute()" :isMuted="isMuted"></slot>
       </div>
     </script>
 
@@ -60,6 +60,7 @@
             timeIsOver: false,
             innerPlaylist: this.selectedPlaylist,
             loadBar: null,
+            isMuted: true,
             events: {
               onReady() {
                 if (vm.innerPlaylist.start_offset) {
@@ -85,8 +86,8 @@
                 }
                 if (vm.loadBar) {
                   const full = vm.innerPlaylist.end_offset - vm.innerPlaylist.start_offset;
-                  const a = (statusObject.current - vm.innerPlaylist.start_offset) / full;
-                  vm.loadBar.set(a);
+                  const currenPosTime = (statusObject.current - vm.innerPlaylist.start_offset) / full;
+                  vm.loadBar.set(currenPosTime);
                 } 
               },
               onSeek() {
@@ -117,7 +118,6 @@
                 events: vm.events,
               });
               this.player.seek(val.start_offset);
-              console.log(val.start_offset);
               this.player.play();
               if (this.isOpenedMoreInfo) {
                 this.player.pause();
@@ -181,6 +181,20 @@
           },
         },
 
+        methods: {
+          mute() {
+            this.isMuted = !this.isMuted;
+            if (this.isMuted) {
+              this.player.setVolume(0);
+              this.player.mute();
+            }
+            else {
+              this.player.unmute();
+              this.player.setVolume(100);
+            }
+          },
+        },
+
         mounted() {
           const vm = this;
           var playerElement = document.getElementById(this.targetId);
@@ -191,7 +205,7 @@
             language: 'ru',
             source: this.innerPlaylist.content.playlist_url,
             poster: this.innerPlaylist.content.poster.image_url,
-            mute: true,
+            mute: vm.isMuted,
             width: '100%',
             height: '100%',
             chromeless: true,
@@ -284,8 +298,9 @@
                   :is-opened-more-info="isOpenedMoreInfo"
                   :selected-playlist.sync="selectedPlaylist"
                   @update="setMoment"
+                  :key="selectedMoment.id"
                   >
-                  <template v-slot:pseudo="{ selected }">
+                  <template v-slot:pseudo="{ selected, mute, isMuted }">
                     <div v-if="isOpenedMoreInfo" class="slider-item-banner__contaier">
                       <div class="slider-item-banner">
                         <div class="item-banner__image-container">
@@ -329,6 +344,11 @@
                           <div @click="isOpenedMoreInfo = true" class="button button-outline button-continue">Продолжить</div>
                         </div>
                       </div>
+                    </div>
+
+                    <div @click="mute" class="moment-volume-container">
+                      <img v-if="isMuted" src="img/volume-mute.svg" alt="">
+                      <img v-else src="img/volume-unmute.svg" alt="">
                     </div>
                   </template>
                 </vue-slide>

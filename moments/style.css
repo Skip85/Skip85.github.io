@@ -281,6 +281,35 @@ p {
 .pagination-right {
 }
 
+.moment-volume-container {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(233, 233, 241, 0.3);
+  backdrop-filter: blur(4px);
+  border-radius: 50%;
+  overflow: hidden;
+  max-width: 32px;
+  max-height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 8;
+  -webkit-user-select: none;
+  /* user-select -- это нестандартное свойство */
+
+  -moz-user-select: none;
+  /* поэтому нужны префиксы */
+
+  -ms-user-select: none;
+}
+
+.moment-volume-container img {
+}
+
 /* < BANNER > */
 
 .slider-item {

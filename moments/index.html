@@ -144,6 +144,8 @@
               $(`#${vm.targetId}`).find('video')[0] && $(`#${vm.targetId}`).find('video')[0].addEventListener('touchstart', () => {
                 vm.player.core.mediaControl.hide();
               });
+
+              this.isMuted ? this.player.mute() : this.player.unmute();
             }
           },
 

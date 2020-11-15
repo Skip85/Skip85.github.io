@@ -98,6 +98,15 @@
                 }
               });
               }
+              $(`#${vm.targetId}`).find('video').attr('webkit-playsinline', 'webkit-playsinline');
+              $(`#${vm.targetId}`).find('video').attr('playsinline', 'playsinline');
+              $(`#${vm.targetId}`).find('video').attr('x-webkit-playsinline', 'x-webkit-playsinline');
+              $(`#${vm.targetId}`).find('video')[0] && $(`#${vm.targetId}`).find('video')[0].addEventListener('touchstart', () => {
+                vm.player.core.mediaControl.hide();
+              });
+
+              console.log('innerPlaylist', this.targetId);
+              
             }
           },
 
@@ -199,12 +208,16 @@
             vm.player.play();
           }
 
-          $('.player').find('video').attr('webkit-playsinline', 'webkit-playsinline');
-          $('.player').find('video').attr('playsinline', 'playsinline');
-          $('.player').find('video').attr('x-webkit-playsinline', 'x-webkit-playsinline');
-          $('.player').find('video')[0] && $('.player').find('video')[0].addEventListener('touchstart', () => {
-            vm.player.core.mediaControl.show();
+          
+          $(`#${vm.targetId}`).find('video').attr('webkit-playsinline', 'webkit-playsinline');
+          $(`#${vm.targetId}`).find('video').attr('playsinline', 'playsinline');
+          $(`#${vm.targetId}`).find('video').attr('x-webkit-playsinline', 'x-webkit-playsinline');
+          $(`#${vm.targetId}`).find('video')[0] && $(`#${vm.targetId}`).find('video')[0].addEventListener('touchstart', () => {
+            vm.player.core.mediaControl.hide();
           });
+          
+          window.player = vm.player;
+          console.log('mount', this.targetId);
         },
 
         async beforeDestroy() {
@@ -605,8 +618,8 @@
             chromeless: true,
             loop: true,
             autoPlay: true,
-            playInline: true,
             mimetype: 'application/x-mpegURL',
+            playInline: true,
             strings: {
               ru: {
                 playback_not_supported: 'Приносим свои извинения, данное видео сейчас недоступно, попробуйте позднее',

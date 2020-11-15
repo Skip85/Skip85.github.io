@@ -117,6 +117,7 @@
                 events: vm.events,
               });
               this.player.seek(val.start_offset);
+              console.log(val.start_offset);
               this.player.play();
               if (this.isOpenedMoreInfo) {
                 this.player.pause();
@@ -143,9 +144,6 @@
               $(`#${vm.targetId}`).find('video')[0] && $(`#${vm.targetId}`).find('video')[0].addEventListener('touchstart', () => {
                 vm.player.core.mediaControl.hide();
               });
-
-              console.log('innerPlaylist', this.targetId);
-              
             }
           },
 
@@ -211,7 +209,6 @@
           if (!this.useIntersect) {
             vm.player.play();
           }
-
           
           $(`#${vm.targetId}`).find('video').attr('webkit-playsinline', 'webkit-playsinline');
           $(`#${vm.targetId}`).find('video').attr('playsinline', 'playsinline');
@@ -219,9 +216,7 @@
           $(`#${vm.targetId}`).find('video')[0] && $(`#${vm.targetId}`).find('video')[0].addEventListener('touchstart', () => {
             vm.player.core.mediaControl.hide();
           });
-          
           window.player = vm.player;
-          console.log('mount', this.targetId);
         },
 
         async beforeDestroy() {
@@ -597,9 +592,8 @@
               });
             };
 
-            const observer = new IntersectionObserver(callback, options);
-            console.log(observer);
-            if (observer) {
+            if ('IntersectionObserver' in window) {
+              const observer = new IntersectionObserver(callback, options);
               for ( let i = 0; i < this.collections.length; i++) {
                 if (_.size(vm.collections[i].moments)) {
                   var options = {

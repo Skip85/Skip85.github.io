@@ -659,10 +659,10 @@
 
           vm.player.attachTo(playerElement);
 
-          $(`#${playerElement}`).find('video').attr('webkit-playsinline', 'webkit-playsinline');
-          $(`#${playerElement}`).find('video').attr('playsinline', 'playsinline');
-          $(`#${playerElement}`).find('video').attr('x-webkit-playsinline', 'x-webkit-playsinline');
-          $(`#${playerElement}`).find('video')[0] && $(`#${playerElement}`).find('video')[0].addEventListener('touchstart', () => {
+          $('#header').find('video').attr('webkit-playsinline', 'webkit-playsinline');
+          $('#header').find('video').attr('playsinline', 'playsinline');
+          $('#header').find('video').attr('x-webkit-playsinline', 'x-webkit-playsinline');
+          $('#header').find('video')[0] && $('#header').find('video')[0].addEventListener('touchstart', () => {
             vm.player.core.mediaControl.hide();
           });
 

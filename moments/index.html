@@ -65,6 +65,7 @@
               onReady() {
                 if (vm.innerPlaylist.start_offset) {
                   this.seek(vm.innerPlaylist.start_offset);
+                  console.log('qqqqqqq', vm.innerPlaylist.start_offset);
                   this.core.mediaControl.resetKeepVisible();
                 }
               },
@@ -76,6 +77,7 @@
                     vm.$emit('update', nextMoment);
                     vm.player.configure({
                       source: vm.innerPlaylist.content.playlist_url,
+                      events: vm.events,
                     });
                     vm.player.play();
                   }
@@ -91,7 +93,9 @@
                 } 
               },
               onSeek() {
-                vm.player.play();
+                debugger
+                window.qq = vm.player;
+                this.play();
               },
               onError() {
                 vm.player.stop();
@@ -142,14 +146,11 @@
               $(`#${vm.targetId}`).find('video')[0] && $(`#${vm.targetId}`).find('video')[0].addEventListener('touchstart', () => {
                 vm.player.core.mediaControl.hide();
               });
-
               
               this.player.seek(val.start_offset);
-              this.player.play();
 
-              
-              vm.player.on(Clappr.Events.PLAYER_PLAY, function() { vm.player.seek(val.start_offset); console.log('test', vm.player.getCurrentTime()); });
-              console.log('test');
+              this.player.play();
+              console.log('test-1');
 
               this.isMuted ? this.player.mute() : this.player.unmute();
             }
@@ -241,13 +242,8 @@
           });
           window.player = vm.player;
 
-          // function OnPlayerStarted() {
-            
-          //   debugger
-          // }
-          
-          // vm.player.core.activePlayback.on(Clappr.Events.CONTAINER_SEEK, OnPlayerStarted);
-          console.log('test', vm.player.getCurrentTime());
+          vm.player.on(Clappr.Events.PLAYER_READY, function() { console.log('test-re', vm.player.getCurrentTime()); });
+
         },
 
         async beforeDestroy() {

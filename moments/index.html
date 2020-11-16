@@ -659,6 +659,13 @@
 
           vm.player.attachTo(playerElement);
 
+          $(`#${playerElement}`).find('video').attr('webkit-playsinline', 'webkit-playsinline');
+          $(`#${playerElement}`).find('video').attr('playsinline', 'playsinline');
+          $(`#${playerElement}`).find('video').attr('x-webkit-playsinline', 'x-webkit-playsinline');
+          $(`#${playerElement}`).find('video')[0] && $(`#${playerElement}`).find('video')[0].addEventListener('touchstart', () => {
+            vm.player.core.mediaControl.hide();
+          });
+
           this.$nextTick(() => {
             vm.player.play();
           });

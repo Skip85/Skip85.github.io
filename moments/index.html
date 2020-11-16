@@ -143,12 +143,12 @@
                 vm.player.core.mediaControl.hide();
               });
 
+              
               this.player.seek(val.start_offset);
-              this.$nextTick(() => {
-                this.player.play();
-              })
+              this.player.play();
 
-              vm.player.on(Clappr.Events.PLAYER_PLAY, function() { console.log(vm.player.getCurrentTime()); })
+              
+              vm.player.on(Clappr.Events.PLAYER_PLAY, function() { vm.player.seek(val.start_offset); console.log('test', vm.player.getCurrentTime()); });
               console.log('test');
 
               this.isMuted ? this.player.mute() : this.player.unmute();
@@ -245,9 +245,9 @@
             
           //   debugger
           // }
-          vm.player.on(Clappr.Events.PLAYER_PLAY, function() { console.log(vm.player.getCurrentTime()); })
-          // vm.player.core.activePlayback.on(Clappr.Events.CONTAINER_SEEK, OnPlayerStarted);
           
+          // vm.player.core.activePlayback.on(Clappr.Events.CONTAINER_SEEK, OnPlayerStarted);
+          console.log('test', vm.player.getCurrentTime());
         },
 
         async beforeDestroy() {

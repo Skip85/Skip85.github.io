@@ -144,7 +144,12 @@
               });
 
               this.player.seek(val.start_offset);
-              this.player.play();
+              this.$nextTick(() => {
+                this.player.play();
+              })
+
+              vm.player.on(Clappr.Events.PLAYER_PLAY, function() { console.log(vm.player.getCurrentTime()); })
+              
 
               this.isMuted ? this.player.mute() : this.player.unmute();
             }
@@ -235,6 +240,14 @@
             vm.player.core.mediaControl.hide();
           });
           window.player = vm.player;
+
+          // function OnPlayerStarted() {
+            
+          //   debugger
+          // }
+          vm.player.on(Clappr.Events.PLAYER_PLAY, function() { console.log(vm.player.getCurrentTime()); })
+          // vm.player.core.activePlayback.on(Clappr.Events.CONTAINER_SEEK, OnPlayerStarted);
+          
         },
 
         async beforeDestroy() {

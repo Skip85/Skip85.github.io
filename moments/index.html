@@ -117,13 +117,11 @@
                 poster: val.content.poster.image_url,
                 events: vm.events,
               });
-              this.player.seek(val.start_offset);
-              this.player.play();
+              
               if (this.isOpenedMoreInfo) {
                 this.player.pause();
               }
               else {
-                this.player.play();
                 this.$nextTick(() => {
                 if (vm.loadBar) vm.loadBar.destroy();
                 if (document.getElementById(`emoji-${val.id}`)) {
@@ -144,6 +142,9 @@
               $(`#${vm.targetId}`).find('video')[0] && $(`#${vm.targetId}`).find('video')[0].addEventListener('touchstart', () => {
                 vm.player.core.mediaControl.hide();
               });
+
+              this.player.seek(val.start_offset);
+              this.player.play();
 
               this.isMuted ? this.player.mute() : this.player.unmute();
             }

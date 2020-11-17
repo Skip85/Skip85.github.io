@@ -65,7 +65,6 @@
               onReady() {
                 if (vm.innerPlaylist.start_offset) {
                   this.seek(vm.innerPlaylist.start_offset);
-                  console.log('qqqqqqq', vm.innerPlaylist.start_offset);
                   this.core.mediaControl.resetKeepVisible();
                 }
               },
@@ -227,7 +226,6 @@
 
           vm.player.attachTo(playerElement);
 
-
           if (!this.useIntersect) {
             vm.player.seek(this.innerPlaylist.start_offset);
           }
@@ -240,7 +238,7 @@
           });
           window.player = vm.player;
 
-          vm.player.on(Clappr.Events.PLAYER_READY, function() { console.log('test-re', vm.player.getCurrentTime()); });
+          console.log(navigator.platform);
 
         },
 
@@ -258,6 +256,7 @@
         <div class="container player-header">
           <img class="icon" src="img/icon.svg" alt="">
           <h1 class="title">Как быстро <br> выбрать кино?</h1>
+          <span>{{ a }}</span>
           <p class="description">Что посмотреть, когда ищешь новое или не можешь <br> вспомнить тот самый фильм</p>
         </div>
       </div>
@@ -531,6 +530,7 @@
             isOpenedMoreInfo: false,
             selectedPlaylist: null, // Конктерный фильм
             location: window.location.href,
+            a: window.navigator.platform,
           };
         },
 

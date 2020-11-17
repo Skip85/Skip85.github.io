@@ -145,6 +145,7 @@
               });
               
               this.player.seek(val.start_offset);
+              $(`#${this.targetId}`).find('video')[0].currentTime = val.start_offset;
 
               console.log('test-2');
 
@@ -677,8 +678,8 @@
           });
 
           this.$nextTick(() => {
-            vm.player.play();
             $('#header').find('video')[0].currentTime = 0;
+            vm.player.play();
           });
         }
       });

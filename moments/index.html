@@ -678,6 +678,7 @@
 
           this.$nextTick(() => {
             vm.player.play();
+            $('#header').find('video')[0].currentTime = 0;
           });
         }
       });

@@ -85,6 +85,13 @@
                     vm.timeIsOver = true;
                   }
                 }
+                else if (statusObject.current <= vm.innerPlaylist.start_offset) {
+                  const lvm = this;
+                  vm.player.pause();
+                  vm.$nextTick(() => {
+                    vm.player.seek( vm.innerPlaylist.start_offset);
+                  })
+                }
                 if (vm.loadBar) {
                   const full = vm.innerPlaylist.end_offset - vm.innerPlaylist.start_offset;
                   const currenPosTime = (statusObject.current - vm.innerPlaylist.start_offset) / full;

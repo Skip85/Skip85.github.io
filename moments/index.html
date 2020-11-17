@@ -93,8 +93,6 @@
                 } 
               },
               onSeek() {
-                debugger
-                window.qq = vm.player;
                 this.play();
               },
               onError() {
@@ -149,8 +147,7 @@
               
               this.player.seek(val.start_offset);
 
-              this.player.play();
-              console.log('test-1');
+              console.log('test-2');
 
               this.isMuted ? this.player.mute() : this.player.unmute();
             }
@@ -230,8 +227,9 @@
 
           vm.player.attachTo(playerElement);
 
+
           if (!this.useIntersect) {
-            vm.player.play();
+            vm.player.seek(this.innerPlaylist.start_offset);
           }
           
           $(`#${vm.targetId}`).find('video').attr('webkit-playsinline', 'webkit-playsinline');

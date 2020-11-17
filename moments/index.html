@@ -86,13 +86,15 @@
                   }
                 }
                 else if (statusObject.current <= vm.innerPlaylist.start_offset) {
-                  const lvm = this;
-                  vm.player.pause();
-                  vm.$nextTick(() => {
-                    vm.player.seek( vm.innerPlaylist.start_offset);
-                  })
+                  if (vm.player.isPlaying()) {
+                    const lvm = this;
+                    vm.player.pause();
+                    vm.$nextTick(() => {
+                      vm.player.seek( vm.innerPlaylist.start_offset);
+                    })
+                  }
                 }
-                if (vm.loadBar) {
+                if (vm.loadBar && statusObject.current >= vm.innerPlaylist.start_offset && statusObject.current <= vm.innerPlaylist.end_offset) {
                   const full = vm.innerPlaylist.end_offset - vm.innerPlaylist.start_offset;
                   const currenPosTime = (statusObject.current - vm.innerPlaylist.start_offset) / full;
                   vm.loadBar.set(currenPosTime);
@@ -155,9 +157,6 @@
               
               this.$nextTick();
               this.player.seek(val.start_offset);
-              $(`#${this.targetId}`).find('video')[0].currentTime = val.start_offset;
-
-              console.log('test-2');
 
               this.isMuted ? this.player.mute() : this.player.unmute();
             }
@@ -247,10 +246,6 @@
           $(`#${vm.targetId}`).find('video')[0] && $(`#${vm.targetId}`).find('video')[0].addEventListener('touchstart', () => {
             vm.player.core.mediaControl.hide();
           });
-          window.player = vm.player;
-
-          console.log(navigator.platform);
-
         },
 
         async beforeDestroy() {
@@ -267,7 +262,6 @@
         <div class="container player-header">
           <img class="icon" src="img/icon.svg" alt="">
           <h1 class="title">Как быстро <br> выбрать кино?</h1>
-          <span>{{ a }}</span>
           <p class="description">Что посмотреть, когда ищешь новое или не можешь <br> вспомнить тот самый фильм</p>
         </div>
       </div>
@@ -541,7 +535,6 @@
             isOpenedMoreInfo: false,
             selectedPlaylist: null, // Конктерный фильм
             location: window.location.href,
-            a: window.navigator.platform,
           };
         },
 

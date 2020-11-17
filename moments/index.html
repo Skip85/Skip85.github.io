@@ -92,7 +92,9 @@
                 } 
               },
               onSeek() {
-                this.play();
+                vm.$nextTick(() => {
+                  this.play();
+                })
               },
               onError() {
                 vm.player.stop();
@@ -144,6 +146,7 @@
                 vm.player.core.mediaControl.hide();
               });
               
+              this.$nextTick();
               this.player.seek(val.start_offset);
               $(`#${this.targetId}`).find('video')[0].currentTime = val.start_offset;
 

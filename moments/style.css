@@ -14,6 +14,10 @@ body::-webkit-scrollbar {
   width: 0px;
 }
 
+.menu-container::-webkit-scrollbar {
+  width: 0;
+}
+
 body .container {
   margin: 0 auto;
   max-width: 1280px;
@@ -146,6 +150,7 @@ p {
 }
 
 .information-actions__item {
+  text-transform: uppercase;
   padding: 0 10px;
   padding-top: 50px;
   opacity: 0.4;
@@ -228,6 +233,9 @@ p {
 
 .choosen-moment__actions .button {
   margin: 8px;
+}
+.choosen-moment__actions .button:hover {
+  background-color: transparent !important;
 }
 
 .choosen-moment__item {
@@ -448,7 +456,7 @@ p {
 }
 
 .menu-close {
-  position: absolute;
+  position: fixed;
   top: 30px;
   right: 30px;
 }
@@ -515,13 +523,18 @@ p {
     background-color: #030001;
   }
 
+  .swiper-slide {
+    max-width: 40%;
+  }
+
   .swiper-slide.slider-item {
     position: relative;
-    height: 320px;
+    height: 314px;
     width: 560px;
     border-radius: 6px;
     overflow: hidden;
   }
+
 
   .swiper-slide-pseudo {
     position: absolute;
@@ -554,12 +567,13 @@ p {
     z-index: 3;
   }
   
-  .slider-item--info .moment-name {
+  .moment-name {
     opacity: .7;
     font-size: 12px;
+    text-transform: uppercase;
   }
 
-  .slider-item--info .content-name {
+ .content-name {
     margin-top: 8px;
     font-size: 22px;
     font-weight: 600;
@@ -748,6 +762,10 @@ p {
     margin-right: 10px;
   }
 
+  .chosen-moment {
+    margin: 0 -10px;
+  }
+
   .pagination-left, .pagination-right {
     padding: 10px;
   }
@@ -892,6 +910,31 @@ p {
 @media (max-width: 500px) {
   .footer-image {
     max-width: 100%;
+  }
+
+  .information-actions__item {
+    font-size: 7px;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .swiper-slide.slider-item {
+    height: 158px;
+  }
+
+  .slider .swiper-wrapper {
+    height: auto;
+  }
+
+  .content-name {
+    font-size: 16px;
+  }
+  .moment-name {
+    font-size: 9px;
+  }
+
+  .chosen-moment {
+    height: 214px;
   }
 }
 

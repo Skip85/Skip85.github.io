@@ -81,16 +81,16 @@
                     vm.player.play();
                   }
                   else {
+                    console.log('stop')
                     vm.player.stop();
                     vm.timeIsOver = true;
                   }
                 }
-                else if (statusObject.current <= vm.innerPlaylist.start_offset) {
-                  if (vm.player.isPlaying()) {
-                    const lvm = this;
+                else if (statusObject.current < vm.innerPlaylist.start_offset) {
+                  if (vm.player && vm.player.isPlaying()) {
                     vm.player.pause();
                     vm.$nextTick(() => {
-                      vm.player.seek( vm.innerPlaylist.start_offset);
+                      vm.player.seek(vm.innerPlaylist.start_offset);
                     })
                   }
                 }
@@ -153,6 +153,39 @@
               $(`#${vm.targetId}`).find('video').attr('x-webkit-playsinline', 'x-webkit-playsinline');
               $(`#${vm.targetId}`).find('video')[0] && $(`#${vm.targetId}`).find('video')[0].addEventListener('touchstart', () => {
                 vm.player.core.mediaControl.hide();
+              });
+
+              vm.player.core.activePlayback.on(Clappr.Events.PLAYBACK_LEVELS_AVAILABLE, () => { // тут появляется _hls
+                vm.player.core.activePlayback._hls && vm.player.core.activePlayback._hls.on('hlsError', function(event, object) { // обрабатываем ошибку неработающей ссылки на кач-во (переключаем кач-во на другое)
+                  if (object.details === 'levelLoadError') { // опа, у нас херовая юрлка на чанклист! выпиливаем это качество нахер!
+                    if (object.type === 'networkError') {
+                      if (this.levelController.levels && this.levelController.levels.length > 1) { // нет смысла, если нет других качеств
+                        const currentLevel = this.levelController.levels[this.levelController.currentLevelIndex];
+                        if (!currentLevel) return;
+
+                        const nextLevel = _.find(this.levelController.levels, level => level.loadError < 2); // кач-во, на котором ещё нет кучи ошибок
+                        if (!nextLevel) return; // не на что переключить качество, поэтому забиваем пускай плеер покажет ошибку
+
+                        const currentPlayback = vm.player.core.activePlayback;
+                        if (!currentPlayback) return; // wtf?!
+
+                        const nextPlaybackLevel = _.find(currentPlayback.levels, { level: nextLevel }); // ищем новое кач-во среди доступных плейбеку
+                        if (!nextPlaybackLevel) return;
+
+                        currentPlayback.currentLevel = nextPlaybackLevel.id; // переключаем кач-во на другое (nextLevel), если оно есть
+
+                        // обновляем интерфейс
+                        const levelSelectorPlugin = vm.player.getPlugin('level_selector');
+                        if (levelSelectorPlugin) levelSelectorPlugin.selectedLevelId = currentPlayback.currentLevel;
+                        vm.player.core.activePlayback.trigger(Clappr.Events.PLAYBACK_BITRATE, { level: currentPlayback.currentLevel });
+                      }
+                    }
+                  }
+                  else if (object.details === 'bufferAppendError' && object.type === 'mediaError') {
+                    vm.$nextTick();
+                    vm.player.play();
+                  }
+                });
               });
               
               this.$nextTick();
@@ -246,6 +279,8 @@
           $(`#${vm.targetId}`).find('video')[0] && $(`#${vm.targetId}`).find('video')[0].addEventListener('touchstart', () => {
             vm.player.core.mediaControl.hide();
           });
+
+          
         },
 
         async beforeDestroy() {
@@ -615,7 +650,7 @@
                   spaceBetween: 10,
                 },
                 768: {
-                  slidesPerView: 2,
+                  slidesPerView: 'auto',
                 },
               },
             });
@@ -647,7 +682,7 @@
           vm.player = new Clappr.Player({
             language: 'ru',
             source: './src/header-video.mp4',
-            poster: './img/header-banner.png',
+            poster: './img/header-banner.jpg',
             mute: true,
             width: '100%',
             height: '100%',

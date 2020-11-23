@@ -124,8 +124,8 @@
                 this.$emit('update:selectedPlaylist', _.cloneDeep(val));
               }
 
+              this.player.load(val.content.playlist_url, 'application/x-mpegURL', true);
               this.player.configure({
-                source: val.content.playlist_url,
                 poster: val.content.poster.image_url,
                 events: vm.events,
               });
@@ -259,6 +259,7 @@
             chromeless: true,
             playInline: true,
             preload: 'auto',
+            mimetype: 'application/x-mpegURL',
             strings: {
               ru: {
                 playback_not_supported: 'Приносим свои извинения, данное видео сейчас недоступно, попробуйте позднее',

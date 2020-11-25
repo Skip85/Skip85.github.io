@@ -458,7 +458,7 @@
           <div class="about">
             <div class="about-item">
               <img class="eyes" src="img/eyes.svg" alt="">
-              <p class="about-item__title">Опирайтесь на свои эмоции</p>
+              <p class="about-item__title">Опирайтесь <br> на свои эмоции</p>
               <div class="about-item__description">
                 Часто рейтинги и чужие мнения не дают представления о фильме, а наоборот искажают ожидания.
                 Поэтому доверяйте только своему мнению, выбрайте кино по ярким моментам фильма, опираясь на эмоциями
@@ -467,19 +467,19 @@
 
             <div class="about-item">
               <img class="lightning" src="img/lightning.svg" alt="">
-              <p class="about-item__title">Опирайтесь на свои эмоции</p>
+              <p class="about-item__title">«Потрогайте» фильм<br> за 15 секунд</p>
               <div class="about-item__description">
-                Часто рейтинги и чужие мнения не дают представления о фильме, а наоборот искажают ожидания.
-                Поэтому доверяйте только своему мнению, выбрайте кино по ярким моментам фильма, опираясь на эмоциями
+                Смотреть подборки из фильмов по 15 сек гораздо интреснее, чем ходить по каталогу жанров, читать 
+                о каждом фильме или смотреть трейлеры. Просмотр таких подборок — уже увлекательное путешествие в мир кино
               </div>
             </div>
 
             <div class="about-item">
               <img class="heart" src="img/heart.png" alt="">
-              <p class="about-item__title">Опирайтесь на свои эмоции</p>
+              <p class="about-item__title">«Все поцелуи Гарри<br> Поттера» и не только</p>
               <div class="about-item__description">
-                Часто рейтинги и чужие мнения не дают представления о фильме, а наоборот искажают ожидания.
-                Поэтому доверяйте только своему мнению, выбрайте кино по ярким моментам фильма, опираясь на эмоциями
+                Любите всесенную Marvel или Игру престолов?  Мы собираем тематические каналы, например «Все поцелуи Харли Квин»
+                или «Драки из Матрицы». Переживайте эмоциональные моменты с любимыми героями или открывайте новые горизонты кино
               </div>
             </div>
           </div>
@@ -530,7 +530,7 @@
             <div class="menu-item__films">
               <template v-if="_.size(item.moments)">
                 <div
-                  v-for="film in item.moments"
+                  v-for="film in _.take(item.moments, 1)"
                   :key="film.id"
                   class="films-item"
                   >
@@ -552,7 +552,8 @@
       Vue.mixin({
         computed: {
           $axios: () => axios.create({
-            baseURL: 'https://api-staging.viasat.su/api',
+            // baseURL: 'https://api-staging.viasat.su/api',
+            baseURL: 'https://api-production.vipplay.ru/api',
           }),
         }
       });

@@ -49,6 +49,7 @@
           chosenId: { type: String, default: '' },
           isOpenedMoreInfo: { type: Boolean, default: false },
           selectedPlaylist: { type: Object, default: null },
+          isLooping: { type: Boolean, default: false },
         },
 
         data() {
@@ -74,14 +75,20 @@
                   if (nextMoment) {
                     vm.innerPlaylist =  nextMoment;
                     vm.$emit('update', nextMoment);
-                    vm.player.configure({
-                      source: vm.innerPlaylist.content.playlist_url,
-                      events: vm.events,
-                    });
+                    
                     vm.player.play();
                   }
+                  else if (vm.isLooping) {
+                    const moment = _.head(vm.moments);
+                    if (moment) {
+                      vm.innerPlaylist =  moment;
+                      vm.$emit('update', moment);
+                      vm.player.pause();
+                      vm.player.seek(moment.start_offset);
+                      vm.player.play();
+                    }
+                  }
                   else {
-                    console.log('stop')
                     vm.player.stop();
                     vm.timeIsOver = true;
                   }
@@ -127,6 +134,11 @@
               this.player.load(val.content.playlist_url, 'application/x-mpegURL', true);
               this.player.configure({
                 poster: val.content.poster.image_url,
+                playback: {
+                  hlsjsConfig: { // https://github.com/video-dev/hls.js/blob/65571665932688556466e2dfb46d09259d158688/docs/API.md#fine-tuning
+                    maxBufferLength: val.end_offset - val.start_offset,
+                  },
+                },
                 events: vm.events,
               });
               
@@ -263,6 +275,11 @@
             strings: {
               ru: {
                 playback_not_supported: 'Приносим свои извинения, данное видео сейчас недоступно, попробуйте позднее',
+              },
+            },
+            playback: {
+              hlsjsConfig: { // https://github.com/video-dev/hls.js/blob/65571665932688556466e2dfb46d09259d158688/docs/API.md#fine-tuning
+                maxBufferLength: this.innerPlaylist.end_offset - this.innerPlaylist.start_offset,
               },
             },
             events: vm.events,
@@ -430,7 +447,8 @@
                   <div v-for="slide in collections" :key="slide.id" class="swiper-slide slider-item" v-if="_.size(slide.moments)">
                     <vue-slide
                       :slide="slide"
-                      :moments="slide.moments"
+                      :moments="_.take(slide.moments, 1)"
+                      :is-looping="true"
                       >
                       <template v-slot:pseudo="{ selected }">
                         <div class="swiper-slide-pseudo" @click="getChannel(slide)">

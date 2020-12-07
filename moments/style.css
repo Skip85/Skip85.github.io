@@ -315,6 +315,22 @@ p {
   -ms-user-select: none;
 }
 
+.moment-volume-inner {
+  position: absolute;
+  background:rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  max-height: 36px;
+  top: calc(50% - 18px);
+  left: calc(50% - 90px);
+  padding: 8px 20px;
+  border-radius: 23px;
+  backdrop-filter: blur(4px);
+  z-index: 3;
+}
+.moment-volume-inner img {
+  padding-right: 8px;
+}
+
 .moment-volume-container img {
 }
 
@@ -582,6 +598,9 @@ p {
   .player-container {
     height: 100%;
     width: 100%;
+  }
+  .player-container.hidden {
+    display: none;
   }
 /* </ SLIDER > */
 
